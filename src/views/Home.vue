@@ -28,9 +28,12 @@
         </header>
         <main @dragenter="dragEnter" @dragleave="dragLeave" @drop.prevent="dropFile" @dragover.prevent class="flex-grow flex flex-col px-6 overflow-y-auto" ref="message_bottom">
           <div v-for="message in $store.state.messages" :key="message.key" style="pointer-events: none" class="mt-2 mb-4 flex">
-            <div v-if="message.uid==$store.state.user.uid" class="ml-auto">
-              <img :data-src="message.url" v-if="message.url" width="360px" height="542px" class="lazyload mt-2 rounded-bl-2xl rounded-t-2xl" />
-              <div v-if="message.content" class="whitespace-pre bg-darkgreen px-2 py-1 rounded-bl-2xl rounded-t-2xl">{{ message.content }}</div>
+            <div v-if="message.uid==$store.state.user.uid" class="ml-auto flex items-end">
+              <p class="mr-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
+              <div>
+                <img :data-src="message.url" v-if="message.url" width="360px" height="542px" class="lazyload mt-2 rounded-bl-2xl rounded-t-2xl" />
+                <div v-if="message.content" class="whitespace-pre bg-darkgreen px-2 py-1 rounded-bl-2xl rounded-t-2xl">{{ message.content }}</div>
+              </div>
             </div>
             <div v-else class="flex">
               <img :src="photoURL(message.uid)" class="h-10 w-10 rounded-full" />
@@ -39,6 +42,7 @@
                 <img :data-src="message.url" v-if="message.url" width="360px" height="542px" class="lazyload mt-2 rounded-tr-2xl rounded-b-2xl" />
                 <div v-if="message.content" class="whitespace-pre bg-gray-500 px-2 py-1 rounded-tr-2xl rounded-b-2xl">{{ message.content }}</div>
               </div>
+              <p class="mt-auto ml-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
             </div>
           </div>
         </main>
@@ -46,32 +50,6 @@
         <div v-show="file_upload_overlay" style="pointer-events: none" class="mx-80 inset-x-0 fixed h-screen z-10 flex justify-center items-center bg-gray-800">
           <p class="font-bold text-4xl">chat demoへアップロードする</p>
         </div>
-        <!-- <div v-show="file_upload_modal" @click="closefileUploadModal" class="z-10 fixed top-0 left-0 h-full w-full flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5)">
-          <div class="z-20 bg-white text-gray-900 w-1/3 rounded-md" @click.stop>
-            <div class="w-full h-2">
-              <div class="bg-green-900 h-full block" style="width: 0%" ref="progress_bar" />
-            </div>
-            <div class="flex flex-col p-6">
-              <div class="flex justify-between items-center">
-                <h2 class="text-3xl font-black leading-loose">ファイルをアップロードする</h2>
-                <span @click="closefileUploadModal" class="text-4xl">×</span>
-              </div>
-              <div class="my-3">
-                <textarea v-model="file_message" class="w-full rounded border-gray-900 border-solid border p-3" placeholder="ファイルに関するメッセージを追加する" />
-              </div>
-              <div class="bg-gray-200 p-3 border border-gray-400 rounded mb-4">
-                <input type="file" @change="setFile" v-if="!file" />
-                <div v-else class="bg-white p-3">
-                  <span class="font-bold text-xl" v-text="file.name" />
-                </div>
-              </div>
-              <div class="flex justify-end items-center">
-                <button v-if="file === ''" class="px-8 py-2 rounded bg-green-900 font-bold text-white opacity-50 focus:outline-none">アップロード</button>
-                <button v-else @click="fileUpload" class="px-8 py-2 rounded bg-green-900 font-bold text-white">アップロード</button>
-              </div>
-            </div>
-          </div>
-        </div> -->
 
         <footer class=" border-t border-gray-700">
           <textarea v-model="message" ref="input" @keydown.enter.exact="keyDownEnter" @keyup.enter.exact="keyUpEnter" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
@@ -130,6 +108,40 @@ export default {
     })
   },
   methods: {
+    howOld(timestamp) {
+      const now = new Date()
+      const nowHour = (`${now.getHours()}`).slice(-2)
+      const nowMin = (`${now.getMinutes()}`).slice(-2)
+      const nowSec = (`${now.getSeconds()}`).slice(-2)
+
+      const time = new Date(timestamp)
+      const year = time.getFullYear()
+      const month = (`${time.getMonth() + 1}`).slice(-2)
+      const day = (`${time.getDate()}`).slice(-2)
+      const hour = (`${time.getHours()}`).slice(-2)
+      const min = (`${time.getMinutes()}`).slice(-2)
+      const sec = (`${time.getSeconds()}`).slice(-2)
+
+      const hourDiff = nowHour - hour
+      const minDiff = nowMin - min
+      const secDiff = nowSec - sec
+
+      const diff = now - time
+
+      if (diff < 10000) {
+        return "now"
+      } else if (diff < 60000) {
+        return secDiff < 0 ? `${secDiff + 60} seconds` : `${secDiff} seconds`
+      } else if (diff < 3600000) {
+        return minDiff < 0 ? `${minDiff + 60} minutes` : `${minDiff} minutes`
+      } else if (diff < 86400000) {
+        return hourDiff < 0 ? `${hourDiff + 24} hours` : `${hourDiff} hours`
+      } else if (diff < 2592000000) {
+        return `${month}/${day}`
+      } else {
+        return `${year}/${month}/${day}`
+      }
+    },
     dragEnter() {
       this.file_upload_overlay = true
     },
@@ -168,6 +180,10 @@ export default {
           createdAt: firebase.database.ServerValue.TIMESTAMP,
           unread: this.opponents,
         })
+        firebase.database().ref("channel").child(this.$store.state.room_id).update({
+          newestMessage: this.message,
+          "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+        })
       } else {
         const storageRef = firebase.storage().ref("images/" + this.file.name)
         const uploadTask = storageRef.put(this.file)
@@ -192,8 +208,11 @@ export default {
             })
           }
         )
+        firebase.database().ref("channel").child(this.$store.state.room_id).update({
+          newestMessage: "Image sent",
+          "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+        })
       }
-
       this.message = this.url = this.file = ""
     },
   },

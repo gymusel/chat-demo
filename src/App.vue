@@ -60,6 +60,17 @@ export default {
           channels.push(channel)
         }
       })
+      firebase.database().ref("channel").on("child_changed", (snapshot) => {
+        let channels = this.$store.state.channels.filter(
+          (item) => item.id !== snapshot.val().id
+        )
+        let changedChannel = this.$store.state.channels.filter(
+          (item) => item.id === snapshot.val().id
+        )
+        changedChannel[0].updatedAt = snapshot.val().updatedAt
+        changedChannel[0].newestMessage = snapshot.val().newestMessage
+        channels.push(changedChannel)
+      })
       this.$store.commit("setChannels", channels)
     },
     setUsers() {

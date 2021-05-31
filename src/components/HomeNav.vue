@@ -9,7 +9,7 @@
         </button>
       </div>
       <div class="h-full overflow-y-scroll">
-        <button v-for="channel in $store.state.channels" :key="channel.id" @click="message(channel)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
+        <button v-for="channel in sortedChannels" :key="channel.id" @click="message(channel)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
           <img :src="channel.photoURL" v-if="channel.photoURL" class="mx-3 bg-black h-12 w-12 rounded-full" />
           <img :src="channel.opponent.photoURL" v-else-if="channel.opponent && channel.opponent.photoURL" class="mx-3 bg-black h-12 w-12 rounded-full" />
           <img src="@/assets/logo.png" v-else class="mx-3 bg-black h-12 w-12 rounded-full" />
@@ -18,11 +18,11 @@
             <div class="w-full flex justify-between items-center">
               <p v-if="channel.opponent" class="font-bold text-sm">{{ channel.opponent.displayName }}</p>
               <p v-else class="font-bold text-sm">{{ channel.displayName }}</p>
-              <p class="font-light text-xs">4:20 PM</p>
+              <p class="font-light text-xs">{{ howOld(channel.updatedAt) }}</p>
             </div>
             <div class="w-full flex justify-between items-center">
-              <p class="font-thin text-xs">hello</p>
-              <div class="font-light text-xs bg-lightgreen h-4 w-4 rounded-full">3</div>
+              <p class="font-thin text-xs">{{ channel.newestMessage }}</p>
+              <!-- <div class="font-light text-xs bg-lightgreen h-4 w-4 rounded-full">3</div> -->
             </div>
           </div>
         </button>
@@ -37,23 +37,23 @@
         </button>
       </div>
       <div class="h-full w-full overflow-y-scroll">
-        <button v-for="user in $store.state.users" :key="user.uid" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
+        <button v-for="user in sortedUsers" :key="user.uid" @click="toggleUserChecked(user.uid)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
           <img :src="user.photoURL" v-if="user.photoURL" class="mx-3 bg-black h-12 w-12 rounded-full" />
           <img src="@/assets/logo.png" v-else class="mx-3 bg-black h-12 w-12 rounded-full" />
           <div class="relative -inset-x-7 inset-y-4 h-4 w-4 rounded-full bg-white flex items-center justify-center">
             <div class="relative h-2 w-2 rounded-full bg-red-600" />
           </div>
           <p class="font-bold text-sm">{{ user.displayName }}</p>
-          <button @click="toggleUserChecked(user.uid)" class="ml-auto mr-4 hover:text-lightgreen focus:outline-none">
+          <div class="ml-auto mr-4 hover:text-lightgreen focus:outline-none">
             <font-awesome-icon :icon="['fas', 'check-circle']" v-if="checkedUsers.includes(user.uid)" size="2x" class="text-lightgreen" />
             <font-awesome-icon :icon="['fas', 'plus-circle']" v-else size="2x" />
-          </button>
+          </div>
         </button>
       </div>
       <div class="mt-auto w-full px-2">
         <input type="text" v-if="checkedUsers.length >= 3" v-model="channel" placeholder="Enter a chat room name" class="my-3 p-2 w-full h-12 rounded bg-gray-700 focus:outline-none" />
         <p class="font-semibold text-lightred">{{ error }}</p>
-        <button @click="addChannel" class="font-bold text-xl my-3 p-2 w-full h-12 rounded bg-lightgreen hover:bg-darkgreen focus:outline-none">Create!</button>
+        <button @click="addChannel" class="font-bold text-xl my-3 p-2 w-full h-12 rounded bg-lightgreen hover:bg-darkgreen focus:outline-none">Start a conversation!</button>
       </div>
     </div>
 
@@ -78,6 +78,18 @@ export default {
     }
   },
   computed: {
+    sortedChannels() {
+      return this.$store.state.channels.slice().sort((a, b) => {
+        return (a.updatedAt < b.updatedAt) ? 1 : (a.updatedAt > b.updatedAt) ? -1 : 0
+      })
+    },
+    sortedUsers() {
+      return this.$store.state.users.slice().sort((a, b) => {
+        let textA = a.displayName.toUpperCase()
+        let textB = b.displayName.toUpperCase()
+        return (textA < textB) ? -1 : (textA > textB) ? 1 : 0
+      })
+    },
     // photoURL: function() {
     //   return function(participants) {
     //     const self = this
@@ -126,6 +138,40 @@ export default {
     toggleRoomSelect() {
       this.roomSelect = this.roomSelect ? false : true
     },
+    howOld(timestamp) {
+      const now = new Date()
+      const nowHour = (`${now.getHours()}`).slice(-2)
+      const nowMin = (`${now.getMinutes()}`).slice(-2)
+      const nowSec = (`${now.getSeconds()}`).slice(-2)
+
+      const time = new Date(timestamp)
+      const year = time.getFullYear()
+      const month = (`${time.getMonth() + 1}`).slice(-2)
+      const day = (`${time.getDate()}`).slice(-2)
+      const hour = (`${time.getHours()}`).slice(-2)
+      const min = (`${time.getMinutes()}`).slice(-2)
+      const sec = (`${time.getSeconds()}`).slice(-2)
+
+      const hourDiff = nowHour - hour
+      const minDiff = nowMin - min
+      const secDiff = nowSec - sec
+
+      const diff = now - time
+
+      if (diff < 10000) {
+        return "now"
+      } else if (diff < 60000) {
+        return secDiff < 0 ? `${secDiff + 60} seconds` : `${secDiff} seconds`
+      } else if (diff < 3600000) {
+        return minDiff < 0 ? `${minDiff + 60} minutes` : `${minDiff} minutes`
+      } else if (diff < 86400000) {
+        return hourDiff < 0 ? `${hourDiff + 24} hours` : `${hourDiff} hours`
+      } else if (diff < 2592000000) {
+        return `${month}/${day}`
+      } else {
+        return `${year}/${month}/${day}`
+      }
+    },
     toggleUserChecked(uid) {
       if (this.checkedUsers.includes(uid)) {
         this.checkedUsers = this.checkedUsers.filter(
@@ -149,6 +195,7 @@ export default {
               displayName: this.channel,
               users: this.checkedUsers,
               id: key_id,
+              updatedAt: firebase.database.ServerValue.TIMESTAMP,
             })
             .then(() => {
               this.channelModal = false
@@ -175,6 +222,7 @@ export default {
         newChannel.set({
           users: [this.uid,user.uid],
           id: roomId,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP,
         })
 
         this.$store.state.channels.forEach(function(channel) {

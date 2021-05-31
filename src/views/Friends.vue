@@ -102,6 +102,7 @@ export default {
       newChannel.set({
         users: [this.currentUserId,this.user.uid],
         id: roomId,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP,
       })
 
       this.$store.state.channels.forEach(function(channel) {
