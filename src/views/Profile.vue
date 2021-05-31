@@ -60,12 +60,13 @@
       <div class="h-48 mb-6 flex items-center justify-around rounded-2xl bg-gray-700">
         <button @click="showProfile" class="hover:text-lightred focus:outline-none"><font-awesome-icon :icon="['fas', 'undo-alt']" size="2x" /></button>
         <div class="flex flex-col items-center justify-around">
-          <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="h-28 w-28 rounded-full" />
-          <img src="@/assets/logo.png" v-else class="h-28 w-28 rounded-full" />
-          <div class="relative inset-x-10 -inset-y-8 h-8 w-8 rounded-full bg-white flex items-center justify-center">
-            <div class="relative h-5 w-5 rounded-full bg-red-600" />
-          </div>
-          <input type="displayName" v-model="displayName" placeholder="ユーザーネーム" class="font-bold text-3xl -m-5 px-2 rounded bg-gray-600 max-w-xs" />
+          <label class="flex items-center hover:opacity-70">
+            <input type="file" @change="uploadPhotoURL" class="absolute opacity-0 w-9" />
+            <font-awesome-icon :icon="['fas', 'user-circle']" v-if="!file" size="2x" class="mr-2" />
+            <font-awesome-icon :icon="['fas', 'user-circle']" v-else size="2x" class="mr-2 text-green-500" />
+            <span v-text="file.name" class="text-green-500" />
+          </label>
+          <input type="displayName" v-model="displayName" placeholder="ユーザーネーム" class="font-bold text-3xl mt-4 px-2 rounded bg-gray-600 max-w-xs" />
         </div>
         <button type="submit" class="hover:text-lightgreen focus:outline-none"><font-awesome-icon :icon="['far', 'save']" size="2x" /></button>
       </div>
@@ -153,6 +154,7 @@ export default {
       displayName: "",
       country: "",
       photoURL: "",
+      file: "",
       nativeLang1: "ja",
       learningLang1: "en",
       hobbies: [],
@@ -184,6 +186,9 @@ export default {
       this.isProfileVisible = false
       this.isEditProfileVisible = true
       this.isOptionOneVisible = false
+    },
+    uploadPhotoURL() {
+      this.file = this.photoURL = event.target.files[0]
     },
     nativeLangSelected(data) {
       this.nativeLang1 = data.code
@@ -220,36 +225,38 @@ export default {
         selfIntroduction: this.selfIntroduction,
       })
 
-      // if (this.photoURL) {
-      //   const storageRef = firebase.storage().ref(`profileImages/${this.user.uid}`)
-      //   const uploadTask = storageRef.put(this.photoURL)
-      //   uploadTask.on('state_changed', 
-      //     snapshot => {
-      //       const percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-      //       this.fileLoading = percentage
-      //     },
-      //     err => {
-      //       console.log(err)
-      //       this['flash/setFlash']({
-      //         message: 'ファイルのアップロードに失敗しました。',
-      //         type: 'error',
-      //       })
-      //     },
-      //     () => {
-      //       uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-      //         this.user.updateProfile({
-      //           photoURL: downloadURL
-      //         })
-      //         this.userRef.update({
-      //           photoURL: downloadURL
-      //         })
-      //         this.$store.commit("updatePhotoURL", downloadURL)
-      //       })
-      //     }
-      //   )
-      // }
+      if (this.file) {
+        const storageRef = firebase.storage().ref(`profileImages/${this.user.uid}`)
+        const uploadTask = storageRef.put(this.file)
+        uploadTask.on('state_changed', 
+          // snapshot => {
+          //   const percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          //   this.fileLoading = percentage
+          // },
+          // err => {
+          //   console.log(err)
+          //   this['flash/setFlash']({
+          //     message: 'ファイルのアップロードに失敗しました。',
+          //     type: 'error',
+          //   })
+          // },
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+              this.user.updateProfile({
+                photoURL: downloadURL
+              })
+              this.userRef.update({
+                photoURL: downloadURL
+              })
+              this.$store.commit("updatePhotoURL", downloadURL)
+            })
+          }
+        )
+      }
 
       this.$store.commit("updateUser", this.displayName, this.nativeLang1, this.learningLang1, this.hobbies, this.selfIntroduction)
+      this.isProfileVisible = true
+      this.isEditProfileVisible = false
     },
     showOptionOne() {
       this.isProfileVisible = false
