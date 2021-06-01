@@ -24,6 +24,19 @@
         <div class="ad" />
       </div>
     </div>
+
+    <div v-show="!addedToHomeScreen" class="fixed bottom-0 z-30 w-screen flex flex-col items-center">
+      <div class="bg-darkgreen text-white rounded-3xl flex flex-col items-center p-3 w-5/6">
+        <button @click="addToHomeScreen" class="w-full flex justify-end">
+          <font-awesome-icon :icon="['fas', 'times-circle']" size="2x" />
+        </button>
+        <img src="@/assets/logo.png" class="h-16 w-16 rounded-xl bg-white p-1" />
+        <h1 class="font-bold text-3xl m-4">Install chat-demo</h1>
+        <p class="text-center text-lightgreen">Install this application on your home screen for quick and easy access when you're on the go.</p>
+        <div class="my-3">Just tap<font-awesome-icon :icon="['far', 'square']" transform="down-3" class="ml-2 text-blue-400" /><font-awesome-icon :icon="['fas', 'long-arrow-alt-up']" transform="up-3 left-11" class="text-blue-400" />then 'Add to Home Screen'</div>
+      </div>
+      <div class="triangle" />
+    </div>
   </div>
 </template>
 
@@ -40,6 +53,7 @@ export default {
     return {
       loading: true,
       uid: "",
+      addedToHomeScreen: true,
     }
   },
   methods: {
@@ -156,11 +170,23 @@ export default {
         }
       })
     },
+    addToHomeScreen() {
+      this.addedToHomeScreen = true
+      firebase.database().ref("users").child(this.uid).update({
+        addedToHomeScreen: true
+      })
+    },
   },
   created() {
+    const self = this
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.uid = user.uid
+        if (matchMedia('(max-width: 640px)').matches) {
+          firebase.database().ref("users").child(user.uid).get().then(function(snapshot) {
+            self.addedToHomeScreen = snapshot.val().addedToHomeScreen
+          })
+        }
         this.setUser()
         this.setChannels()
         this.setUsers()
@@ -173,7 +199,7 @@ export default {
   mounted() {
     setTimeout(() => {
       this.loading = false;
-    }, 1000);
+    }, 1000)
   },
   beforeDestroy() {
     firebase.database().ref("channel").off()
@@ -197,5 +223,10 @@ export default {
   height: 250px;
   background-color: gray;
   margin: 10px;
+}
+.triangle{
+  border-top: 20px solid #286053;
+  border-right: 20px solid transparent;
+  border-left: 20px solid transparent; 
 }
 </style>
