@@ -13,7 +13,7 @@
           <p class="font-bold ml-2">Invite friends</p>
         </button>
       </div>
-      <div class="mb-14 sm:mb-0 h-full overflow-y-scroll">
+      <div class="mb-24 sm:mb-0 h-full overflow-y-scroll">
         <button v-for="channel in sortedChannels" :key="channel.id" @click="message(channel)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
           <div class="ml-3 flex items-end">
             <img :src="channel.photoURL" v-if="channel.photoURL" class="bg-black h-12 w-12 rounded-full" />
@@ -57,7 +57,7 @@
           </div>
         </button>
       </div>
-      <div class="mb-14 sm:mb-0 mt-auto w-full px-2">
+      <div class="mb-24 sm:mb-0 mt-auto w-full px-2">
         <input type="text" v-if="checkedUsers.length >= 3" v-model="channel" placeholder="Enter a chat room name" class="my-3 p-2 w-full h-12 rounded bg-gray-700 focus:outline-none" />
         <p class="font-semibold text-lightred">{{ error }}</p>
         <button @click="addChannel" class="font-bold text-xl my-3 p-2 w-full h-12 rounded bg-lightgreen hover:bg-darkgreen focus:outline-none">Start a conversation!</button>

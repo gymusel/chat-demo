@@ -42,7 +42,7 @@
           <p class="font-bold text-4xl">chat demoへアップロードする</p>
         </div>
 
-        <footer class="mb-14 sm:mb-0 border-t border-gray-700">
+        <footer class="mb-24 sm:mb-0 border-t border-gray-700">
           <textarea v-model="message" ref="input" @keydown.enter.exact="keyDownEnter" @keyup.enter.exact="keyUpEnter" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
           <div class="flex items-center fill-current text-gray-400 ml-6 mb-2">
             <label class="flex items-center hover:opacity-70">

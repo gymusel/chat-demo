@@ -10,7 +10,7 @@
       </button>
     </div>
 
-    <div class="mb-14 sm:mb-0 py-2 overflow-y-auto">
+    <div class="mb-24 sm:mb-0 py-2 overflow-y-auto">
       <button v-show="isNewPartnersVisible" v-for="user in sortedUsers" :key="user.uid" @click="showProfile(user)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
         <div class="ml-3 flex items-end">
           <img :src="user.photoURL" v-if="user.photoURL" class="bg-black h-12 w-12 rounded-full" />

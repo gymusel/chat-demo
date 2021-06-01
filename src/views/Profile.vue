@@ -2,7 +2,7 @@
   <div class="flex">
     <ProfileNav v-on:profile="showProfile" v-on:optionOne="showOptionOne" :class="{ 'hidden sm:inline': !isNavVisible }" class="w-full sm:w-64 py-3 border-r border-gray-700" />
     
-    <div v-show="isProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-14 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+    <div v-show="isProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-24 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
       <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
@@ -28,7 +28,7 @@
           <p class="flex-grow w-full p2">{{ selfIntroduction }}</p>
         </div>
       </div>
-      <div class="lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
+      <div class="mb-24 sm:mb-0 lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
         <div class="p-3 w-full flex flex-col rounded-2xl bg-darkgreen">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightgreen">
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <form @submit.prevent="updateProfile" v-show="isEditProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-14 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+    <form @submit.prevent="updateProfile" v-show="isEditProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-24 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
       <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
@@ -85,7 +85,7 @@
           <textarea v-model="selfIntroduction" placeholder="Put self introduction here!" class="flex-grow w-full p-2 resize-none bg-darkyellow" />
         </div>
       </div>
-      <div class="lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
+      <div class="mb-24 sm:mb-0 lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
         <div class="p-3 w-full flex flex-col rounded-2xl bg-darkgreen">
           <div class="mb-3 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightgreen">
