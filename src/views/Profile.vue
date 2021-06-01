@@ -2,7 +2,7 @@
   <div class="flex">
     <ProfileNav v-on:profile="showProfile" v-on:optionOne="showOptionOne" :class="{ 'hidden sm:inline': !isNavVisible }" class="w-full sm:w-64 py-3 border-r border-gray-700" />
     
-    <div v-show="isProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-24 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+    <div v-show="isProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-24 sm:mb-0 lg:flex lg:justify-between flex-grow h-screen overflow-y-auto">
       <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <form @submit.prevent="updateProfile" v-show="isEditProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-24 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+    <form @submit.prevent="updateProfile" v-show="isEditProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-24 sm:mb-0 lg:flex lg:justify-between flex-grow h-screen overflow-y-auto">
       <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
@@ -64,14 +64,18 @@
       <div class="pt-5 px-5 xl:p-5 lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full">
         <div class="p-3 w-full flex flex-col items-center rounded-2xl bg-gray-700">
           <div class="w-full flex justify-around">
-            <button @click="showProfile" class="hover:text-lightred focus:outline-none"><font-awesome-icon :icon="['fas', 'undo-alt']" size="2x" /></button>
-            <label class="flex items-center hover:opacity-70">
+            <!-- <button @click="showProfile" class="hover:text-lightred focus:outline-none"><font-awesome-icon :icon="['fas', 'undo-alt']" size="2x" /></button> -->
+            <label class="flex flex-col items-center hover:text-lightyellow">
               <input type="file" @change="uploadPhotoURL" class="absolute opacity-0 w-9" />
               <font-awesome-icon :icon="['fas', 'user-circle']" v-if="!file" size="2x" class="mr-2" />
               <font-awesome-icon :icon="['fas', 'user-circle']" v-else size="2x" class="mr-2 text-green-500" />
-              <span v-text="file.name" class="text-green-500" />
+              <p v-if="file.name" v-text="file.name" class="text-green-500" />
+              <p v-else>Upload user icon</p>
             </label>
-            <button type="submit" class="hover:text-lightgreen focus:outline-none"><font-awesome-icon :icon="['far', 'save']" size="2x" /></button>
+            <button type="submit" class="hover:text-lightgreen focus:outline-none">
+              <font-awesome-icon :icon="['far', 'save']" size="2x" />
+              <p>Save</p>
+            </button>
           </div>
           <input type="displayName" v-model="displayName" placeholder="ユーザーネーム" class="w-full font-bold text-3xl mt-4 px-2 rounded bg-gray-600" />
         </div>
@@ -111,7 +115,6 @@
             <div @click="showHobbiesModal" class="mx-2 hover:text-lightred focus:outline-none">
               <font-awesome-icon :icon="['fas', 'plus-circle']" size="2x" />
             </div>
-            <!-- modal -->
             <div v-show="hobbiesModal" @click="closeHobbiesModal" class="z-20 fixed top-0 left-0 h-full w-full flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5)">
               <div @click.stop class="w-64 h-5/6 p-3 rounded-2xl bg-gray-800 overflow-y-auto">
                 <div class="mb-2 flex items-center">
@@ -121,7 +124,7 @@
                   <h1 class="font-bold text-xl">Edit Hobbies</h1>
                 </div>
                 <div class="flex items-center flex-wrap">
-                  <button v-for="hobby in hobbiesOptions" :key="hobby" @click="toggleHobby(hobby)" v-bind:class="{ active: hobbies.includes(hobby) }" class="m-2 px-2 rounded-2xl bg-darkred hover:bg-lightred focus:outline-none">{{ hobby }}</button>
+                  <p v-for="hobby in hobbiesOptions" :key="hobby" @click="toggleHobby(hobby)" v-bind:class="{ 'active': hobbies.includes(hobby) }" class="m-2 px-2 rounded-2xl bg-darkred hover:bg-lightred focus:outline-none">{{ hobby }}</p>
                 </div>
               </div>
             </div>
@@ -292,7 +295,7 @@ export default {
       this.$store.commit("resetStates")
       this.$router.push("/signin")
     },
-  }
+  },
 }
 </script>
 

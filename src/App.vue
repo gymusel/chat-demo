@@ -4,13 +4,17 @@
 
     <div v-show="!loading" class="h-screen flex">
       <!-- apparently $store.state.user below becomes null after loging out and throw an error -->
-      <div v-if="$store.state.user.uid" class="fixed sm:static bottom-0 w-screen sm:w-16 sm:h-screen py-5 sm:py-0 rounded-t-3xl sm:rounded-none z-10 flex sm:flex-col justify-around sm:justify-start items-center bg-gray-900 text-gray-700">
+      <div v-if="$store.state.user.uid" class="fixed sm:static bottom-0 w-screen sm:w-14 sm:h-screen py-5 sm:py-0 rounded-t-3xl sm:rounded-none z-10 flex sm:flex-col justify-around sm:justify-start items-center bg-gray-900 text-gray-700">
         <router-link to="/profile" class="order-last sm:order-none w-10 h-10 m-2 hover:opacity-75 focus:outline-none">
           <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="rounded-full" />
           <img src="@/assets/logo.png" v-else class="rounded-full" />
         </router-link>
-        <router-link to="/friends" class="m-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'users']" size="2x" /></router-link>
-        <router-link to="/" class="m-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'comment-dots']" size="2x" /></router-link>
+        <router-link to="/friends" class="m-2 hover:opacity-75 focus:outline-none">
+          <font-awesome-icon :icon="['fas', 'users']" size="2x" />
+        </router-link>
+        <router-link to="/" class="m-2 hover:opacity-75 focus:outline-none">
+          <font-awesome-icon :icon="['fas', 'comment-dots']" size="2x" />
+        </router-link>
       </div>
 
       <router-view class="flex-grow bg-gray-800 text-white" />

@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen flex flex-col last:justify-end">
 
-    <button @click="$emit('profile')" class="w-full bg-gray-700 mt-8 h-20 p-1 flex items-center focus:outline-none">
+    <button @click="$emit('profile')" class="w-full sm:w-64 bg-gray-700 mt-8 h-20 p-1 flex items-center focus:outline-none">
       <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="h-14 w-14 rounded-full p-1 mr-1" />
       <img src="@/assets/logo.png" v-else class="h-14 w-14 rounded-full p-1 mr-1" />
       <div class="flex flex-col items-start">

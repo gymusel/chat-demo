@@ -2,15 +2,19 @@
   <div class="h-screen flex flex-col">
 
     <div class="p-3 flex justify-between items-center">
-      <button @click="showPartners" v-bind:class="{ active: isPartnersVisible }" class="p-2 bg-gray-900 h-10 rounded text-xs hover:bg-darkgreen focus:outline-none">Partners</button>
-      <button @click="showNewPartners" v-bind:class="{ active: isNewPartnersVisible }" class="p-2 bg-gray-900 h-10 rounded text-xs hover:bg-darkgreen focus:outline-none">New Partners</button>
-      <button @click="changeOrder" class="h-10 w-10 bg-lightgreen rounded hover:opacity-80 focus:outline-none">
+      <button @click="showPartners" v-bind:class="{ active: isPartnersVisible }" class="flex-grow sm:flex-grow-0 m-2 sm:m-0 p-2 bg-gray-900 h-10 rounded text-xs hover:bg-darkgreen focus:outline-none">Partners</button>
+      <button @click="showNewPartners" v-bind:class="{ active: isNewPartnersVisible }" class="flex-grow sm:flex-grow-0 m-2 sm:m-0 p-2 bg-gray-900 h-10 rounded text-xs hover:bg-darkgreen focus:outline-none">New Partners</button>
+      <button @click="changeOrder" class="m-2 sm:m-0 h-10 w-10 bg-lightgreen rounded hover:opacity-80 focus:outline-none">
         <font-awesome-icon :icon="['fas', 'sort-alpha-down']" v-if="sortOrder == 1" />
         <font-awesome-icon :icon="['fas', 'sort-alpha-up']" v-else />
       </button>
     </div>
 
     <div class="mb-24 sm:mb-0 py-2 overflow-y-auto">
+      <button v-show="isPartnersVisible" class="w-full flex flex-col items-center">
+        <h1 class="font-bold text-4xl m-5">Sorry!</h1>
+        <p>This page is currently being developed</p>
+      </button>
       <button v-show="isNewPartnersVisible" v-for="user in sortedUsers" :key="user.uid" @click="showProfile(user)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
         <div class="ml-3 flex items-end">
           <img :src="user.photoURL" v-if="user.photoURL" class="bg-black h-12 w-12 rounded-full" />
