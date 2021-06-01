@@ -1,34 +1,43 @@
 <template>
-  <div class="h-screen flex">
-    <div class="w-16 bg-gray-900 text-gray-700">
-      <!-- apparently $store.state.user below becomes null after loging out and throw an error -->
-      <div v-if="$store.state.user.uid" class="h-screen flex flex-col items-center">
-        <router-link to="/profile" class="w-10 h-10 m-2 hover:opacity-75 focus:outline-none">
-          <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="rounded-full" />
-          <img src="@/assets/logo.png" v-else class="rounded-full" />
-        </router-link>
-        <router-link to="/friends" class="m-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'users']" size="2x" /></router-link>
-        <router-link to="/" class="m-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'comment-dots']" size="2x" /></router-link>
-        <button class="mt-auto mb-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'bell']" /></button>
-      </div>
-    </div>
+  <div>
+    <Loading v-show="loading" class="h-screen bg-gray-900 text-gray-700" />
 
-    <router-view class="flex-grow bg-gray-800 text-white" />
-    
-    <div class="w-80 flex flex-col items-center bg-gray-800 text-white border-l border-gray-700">
-      <div class="ad" />
-      <div class="ad" />
+    <div v-show="!loading" class="h-screen flex">
+      <div class="w-16 bg-gray-900 text-gray-700">
+        <!-- apparently $store.state.user below becomes null after loging out and throw an error -->
+        <div v-if="$store.state.user.uid" class="h-screen flex flex-col items-center">
+          <router-link to="/profile" class="w-10 h-10 m-2 hover:opacity-75 focus:outline-none">
+            <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="rounded-full" />
+            <img src="@/assets/logo.png" v-else class="rounded-full" />
+          </router-link>
+          <router-link to="/friends" class="m-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'users']" size="2x" /></router-link>
+          <router-link to="/" class="m-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'comment-dots']" size="2x" /></router-link>
+          <button class="mt-auto mb-2 hover:opacity-75 focus:outline-none"><font-awesome-icon :icon="['fas', 'bell']" /></button>
+        </div>
+      </div>
+
+      <router-view class="flex-grow bg-gray-800 text-white" />
+      
+      <div class="w-80 flex flex-col items-center bg-gray-800 text-white border-l border-gray-700">
+        <div class="ad" />
+        <div class="ad" />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import Loading from "@/components/Loading"
 import firebase from "firebase/app"
 import "firebase/auth"
 
 export default {
+  components: {
+    Loading,
+  },
   data() {
     return {
+      loading: true,
       uid: "",
     }
   },
@@ -159,6 +168,11 @@ export default {
         this.setConnectionRemoved()
       }
     })
+  },
+  mounted() {
+    setTimeout(() => {
+      this.loading = false;
+    }, 1000);
   },
   beforeDestroy() {
     firebase.database().ref("channel").off()
