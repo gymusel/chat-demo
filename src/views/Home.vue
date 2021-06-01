@@ -94,7 +94,9 @@ export default {
   },
   updated() {
     this.$nextTick(() => {
-      this.$refs.input.focus()
+      if (matchMedia('(min-width: 640px)').matches) {
+        this.$refs.input.focus()
+      }
       const chatLog = this.$refs.message_bottom
       if (!chatLog) return
       chatLog.scrollTop = chatLog.scrollHeight

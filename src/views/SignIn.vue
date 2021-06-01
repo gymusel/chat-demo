@@ -64,7 +64,9 @@ export default {
     }
   },
   mounted() {
-    this.$refs.input.focus()
+    if (matchMedia('(min-width: 640px)').matches) {
+      this.$refs.input.focus()
+    }
   },
   methods: {
     signIn() {
