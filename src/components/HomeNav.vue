@@ -10,11 +10,13 @@
       </div>
       <div class="h-full overflow-y-scroll">
         <button v-for="channel in sortedChannels" :key="channel.id" @click="message(channel)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
-          <img :src="channel.photoURL" v-if="channel.photoURL" class="mx-3 bg-black h-12 w-12 rounded-full" />
-          <img :src="channel.opponent.photoURL" v-else-if="channel.opponent && channel.opponent.photoURL" class="mx-3 bg-black h-12 w-12 rounded-full" />
-          <img src="@/assets/logo.png" v-else class="mx-3 bg-black h-12 w-12 rounded-full" />
-
-          <div class="p-3 flex-grow flex flex-col items-start">
+          <div class="ml-3 flex items-end">
+            <img :src="channel.photoURL" v-if="channel.photoURL" class="bg-black h-12 w-12 rounded-full" />
+          <img :src="channel.opponent.photoURL" v-else-if="channel.opponent && channel.opponent.photoURL" class="bg-black h-12 w-12 rounded-full" />
+          <img src="@/assets/logo.png" v-else class="bg-black h-12 w-12 rounded-full" />
+            <country-flag country='jp' size='small' rounded class="mt-auto relative right-4" />
+          </div>
+          <div class="pr-3 flex-grow flex flex-col items-start">
             <div class="w-full flex justify-between items-center">
               <p v-if="channel.opponent" class="font-bold text-sm">{{ channel.opponent.displayName }}</p>
               <p v-else class="font-bold text-sm">{{ channel.displayName }}</p>

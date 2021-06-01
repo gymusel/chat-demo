@@ -5,6 +5,9 @@ import store from "./store"
 import "./assets/tailwind.css"
 import "./firebase"
 
+import CountryFlag from 'vue-country-flag'
+Vue.component('country-flag', CountryFlag)
+
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { fas } from "@fortawesome/free-solid-svg-icons"
 import { fab } from "@fortawesome/free-brands-svg-icons"

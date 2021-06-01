@@ -21,6 +21,7 @@
     "register-service-worker": "^1.7.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.2",
     "vue": "^2.6.11",
+    "vue-country-flag": "^2.1.1",
     "vue-languages-dropdown": "^1.0.20",
     "vue-onoff-toggle": "^1.1.1",
     "vue-router": "^3.2.0",
