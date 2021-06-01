@@ -2,13 +2,18 @@
   <div>
 
     <div v-if="roomSelect" class="h-screen flex flex-col">
-      <div class="p-3 flex justify-between items-center">
-        <input placeholder="Search" class="h-10 w-44 p-3 bg-gray-900 rounded focus:outline-none" />
+      <!-- <div class="p-3 flex justify-between items-center">
+        <input placeholder="Search" class="h-10 w-44 p-3 bg-gray-900 rounded focus:outline-none" disabled />
         <button @click="toggleRoomSelect" class="h-10 w-10 bg-lightgreen rounded hover:opacity-80 focus:outline-none">
           <font-awesome-icon :icon="['fas', 'plus']" />
+        </button> -->
+      <div class="w-full p-3">
+        <button @click="toggleRoomSelect" class="w-full flex justify-center items-center p-3 bg-darkgreen rounded hover:opacity-80 focus:outline-none">
+          <font-awesome-icon :icon="['fas', 'user-plus']" />
+          <p class="font-bold ml-2">Invite friends</p>
         </button>
       </div>
-      <div class="h-full overflow-y-scroll">
+      <div class="mb-14 sm:mb-0 h-full overflow-y-scroll">
         <button v-for="channel in sortedChannels" :key="channel.id" @click="message(channel)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
           <div class="ml-3 flex items-end">
             <img :src="channel.photoURL" v-if="channel.photoURL" class="bg-black h-12 w-12 rounded-full" />
@@ -52,7 +57,7 @@
           </div>
         </button>
       </div>
-      <div class="mt-auto w-full px-2">
+      <div class="mb-14 sm:mb-0 mt-auto w-full px-2">
         <input type="text" v-if="checkedUsers.length >= 3" v-model="channel" placeholder="Enter a chat room name" class="my-3 p-2 w-full h-12 rounded bg-gray-700 focus:outline-none" />
         <p class="font-semibold text-lightred">{{ error }}</p>
         <button @click="addChannel" class="font-bold text-xl my-3 p-2 w-full h-12 rounded bg-lightgreen hover:bg-darkgreen focus:outline-none">Start a conversation!</button>
@@ -207,6 +212,8 @@ export default {
           this.checkedUsers = [this.uid]
 
           this.toggleRoomSelect()
+
+          this.$emit('toggleNavVisible')
         }
       } else {
         const self = this
@@ -251,6 +258,8 @@ export default {
         this.$store.commit("setMessages", messages)
 
         this.toggleRoomSelect()
+
+        this.$emit('toggleNavVisible')
       }
     },
     message(channel) {
@@ -277,6 +286,8 @@ export default {
         messages.push(snapshot.val())
       })
       this.$store.commit("setMessages", messages)
+
+      this.$emit('toggleNavVisible')
     },
   },
   mounted() {

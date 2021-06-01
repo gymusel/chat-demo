@@ -1,12 +1,10 @@
 <template>
   <div class="flex">
-    <header class="bg-darkgreen w-64 py-3 border-r border-gray-700 flex flex-col items-center">
-      <div class="w-4/5 mt-12">
-        <h1 class="font-bold text-4xl my-4">chat demo</h1>
-        <h3 class="font-semibold">Talk to the World</h3>
-        <p class="flex-wrap my-6">Learn a language by chatting with native speakers around the world. For free!</p>
-      </div>
-      <font-awesome-icon :icon="['fas', 'globe']" size="10x" transform="grow-16" class="mt-auto relative inset-x-16" />
+    <header class="hidden md:inline bg-darkgreen w-64 pt-32 px-5">
+      <h1 class="font-bold text-4xl my-4">chat demo</h1>
+      <h3 class="font-semibold">Talk to the World</h3>
+      <p class="flex-wrap my-6">Learn a language by chatting with native speakers around the world. For free!</p>
+      <font-awesome-icon :icon="['fas', 'globe']" size="10x" transform="grow-16 down-28 right-8" />
     </header>
     <div class="z-10 bg-gray-800 flex-grow flex items-center justify-center">
       <div class="w-full flex justify-center">

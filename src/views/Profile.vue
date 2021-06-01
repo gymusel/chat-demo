@@ -1,12 +1,16 @@
 <template>
   <div class="flex">
-    <ProfileNav v-on:profile="showProfile" v-on:optionOne="showOptionOne" class="w-64 py-3 border-r border-gray-700" />
+    <ProfileNav v-on:profile="showProfile" v-on:optionOne="showOptionOne" :class="{ 'hidden sm:inline': !isNavVisible }" class="w-full sm:w-64 py-3 border-r border-gray-700" />
     
-    <div v-show="isProfileVisible" class="flex-grow flex justify-between flex-wrap">
-      <div class="p-5 h-screen w-1/2 flex flex-col justify-between">
+    <div v-show="isProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-14 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+      <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
+        <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
+        <h1 class="ml-5 font-bold">Back to previous page</h1>
+      </button>
+      <div class="pt-5 px-5 xl:p-5 lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full">
         <div class="p-3 w-full flex flex-col items-center rounded-2xl bg-gray-700">
           <div class="w-full flex justify-around">
-            <button @click="showEditProfile" class="hover:text-lightred focus:outline-none"><font-awesome-icon :icon="['fas', 'cog']" size="2x" /></button>
+            <button @click="showEditProfile" class="hover:text-lightgreen focus:outline-none"><font-awesome-icon :icon="['fas', 'cog']" size="2x" /></button>
             <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="h-28 w-28 rounded-full" />
             <img src="@/assets/logo.png" v-else class="h-28 w-28 rounded-full" />
             <button @click="signOut" class="hover:text-lightred focus:outline-none"><font-awesome-icon :icon="['fas', 'power-off']" size="2x" /></button>
@@ -14,7 +18,7 @@
           <country-flag country='jp' rounded class="relative bottom-5 left-11" />
           <h1 class="font-bold text-3xl">{{ $store.state.user.displayName }}</h1>
         </div>
-        <div class="p-3 mt-6 flex-grow w-full flex flex-col rounded-2xl bg-darkyellow">
+        <div class="lg:flex-grow p-3 mt-5 w-full flex flex-col rounded-2xl bg-darkyellow">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightyellow">
               <font-awesome-icon :icon="['fas', 'bullhorn']" size="2x" />
@@ -24,7 +28,7 @@
           <p class="flex-grow w-full p2">{{ selfIntroduction }}</p>
         </div>
       </div>
-      <div class="p-5 h-screen w-1/2 flex flex-col justify-between">
+      <div class="lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
         <div class="p-3 w-full flex flex-col rounded-2xl bg-darkgreen">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightgreen">
@@ -38,8 +42,7 @@
             <p>{{ learningLang1.toUpperCase() }}</p>
           </div>
         </div>
-
-        <div class="p-3 mt-6 flex-grow w-full flex flex-col rounded-2xl bg-darkred">
+        <div class="lg:flex-grow p-3 mt-5 w-full flex flex-col rounded-2xl bg-darkred">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightred">
               <font-awesome-icon :icon="['fas', 'icons']" size="2x" />
@@ -53,8 +56,12 @@
       </div>
     </div>
 
-    <form @submit.prevent="updateProfile" v-show="isEditProfileVisible" class="flex-grow flex justify-between flex-wrap">
-      <div class="p-5 h-screen w-1/2 flex flex-col justify-between">
+    <form @submit.prevent="updateProfile" v-show="isEditProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-14 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+      <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
+        <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
+        <h1 class="ml-5 font-bold">Back to previous page</h1>
+      </button>
+      <div class="pt-5 px-5 xl:p-5 lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full">
         <div class="p-3 w-full flex flex-col items-center rounded-2xl bg-gray-700">
           <div class="w-full flex justify-around">
             <button @click="showProfile" class="hover:text-lightred focus:outline-none"><font-awesome-icon :icon="['fas', 'undo-alt']" size="2x" /></button>
@@ -68,7 +75,7 @@
           </div>
           <input type="displayName" v-model="displayName" placeholder="ユーザーネーム" class="w-full font-bold text-3xl mt-4 px-2 rounded bg-gray-600" />
         </div>
-        <div class="p-3 mt-6 flex-grow w-full flex flex-col rounded-2xl bg-darkyellow">
+        <div class="lg:flex-grow p-3 mt-5 w-full flex flex-col rounded-2xl bg-darkyellow">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightyellow">
               <font-awesome-icon :icon="['fas', 'bullhorn']" size="2x" />
@@ -78,7 +85,7 @@
           <textarea v-model="selfIntroduction" placeholder="Put self introduction here!" class="flex-grow w-full p-2 resize-none bg-darkyellow" />
         </div>
       </div>
-      <div class="p-5 h-screen w-1/2 flex flex-col justify-between">
+      <div class="lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
         <div class="p-3 w-full flex flex-col rounded-2xl bg-darkgreen">
           <div class="mb-3 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightgreen">
@@ -92,7 +99,7 @@
             <languages-dropdown :selected="learningLang1" v-on:change="learningLangSelected" btn-bg-color="#3ED598" class="text-black max-h-10" />
           </div>
         </div>
-        <div class="p-3 mt-6 flex-grow w-full flex flex-col rounded-2xl bg-darkred">
+        <div class="lg:flex-grow p-3 mt-5 w-full flex flex-col rounded-2xl bg-darkred">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightred">
               <font-awesome-icon :icon="['fas', 'icons']" size="2x" />
@@ -101,9 +108,9 @@
           </div>
           <div class="flex items-center flex-wrap">
             <p v-for="hobby in hobbies" :key="hobby" class="m-2 px-2 rounded-2xl bg-lightred">{{ hobby }}</p>
-            <button @click="showHobbiesModal" class="mx-2 hover:text-lightred focus:outline-none">
+            <div @click="showHobbiesModal" class="mx-2 hover:text-lightred focus:outline-none">
               <font-awesome-icon :icon="['fas', 'plus-circle']" size="2x" />
-            </button>
+            </div>
             <!-- modal -->
             <div v-show="hobbiesModal" @click="closeHobbiesModal" class="z-20 fixed top-0 left-0 h-full w-full flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5)">
               <div @click.stop class="w-64 h-5/6 p-3 rounded-2xl bg-gray-800 overflow-y-auto">
@@ -123,8 +130,11 @@
       </div>
     </form>
     
-    <div v-show="isOptionOneVisible">
-      option one
+    <div v-show="isOptionOneVisible" :class="{ 'hidden sm:inline': isNavInvisible }">
+      <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
+        <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
+        <h1 class="ml-5 font-bold">Back to previous page</h1>
+      </button>
     </div>
 
   </div>
@@ -145,6 +155,8 @@ export default {
   },
   data() {
     return {
+      isNavVisible: true,
+      isNavInvisible: false,
       isProfileVisible: true,
       isEditProfileVisible: false,
       user: {},
@@ -174,8 +186,20 @@ export default {
       self.selfIntroduction = snapshot.val().selfIntroduction
     })
   },
+  mounted() {
+    if (matchMedia('(max-width: 640px)').matches) {
+      this.isNavInvisible = true
+    }
+    // this.isProfileVisible = false
+  },
   methods: {
+    toggleNavVisible() {
+      if (matchMedia('(max-width: 640px)').matches) {
+        this.isNavVisible = this.isNavInvisible = this.isNavVisible ? false : true
+      }
+    },
     showProfile() {
+      this.toggleNavVisible()
       this.isProfileVisible = true
       this.isEditProfileVisible = false
       this.isOptionOneVisible = false
@@ -257,6 +281,7 @@ export default {
       this.isEditProfileVisible = false
     },
     showOptionOne() {
+      this.toggleNavVisible()
       this.isProfileVisible = false
       this.isEditProfileVisible = false
       this.isOptionOneVisible = true

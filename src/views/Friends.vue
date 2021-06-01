@@ -1,9 +1,13 @@
 <template>
   <div class="flex">
-    <FriendsNav @showProfile="showProfile" class="w-64 border-r border-gray-700" />
+    <FriendsNav @showProfile="showProfile" :class="{ 'hidden sm:inline': !isNavVisible }" class="w-full sm:w-64 border-r border-gray-700" />
 
-    <div v-show="isProfileVisible" class="flex-grow flex justify-between flex-wrap">
-      <div class="p-5 h-screen w-1/2 flex flex-col justify-between">
+    <div v-show="isProfileVisible" :class="{ 'hidden sm:inline': isNavInvisible }" class="mb-14 sm:mb-0 lg:flex lg:justify-between lg:flex-wrap flex-grow h-screen overflow-y-auto">
+      <button @click="toggleNavVisible" class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center">
+        <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
+        <h1 class="ml-5 font-bold">Back to previous page</h1>
+      </button>
+      <div class="pt-5 px-5 xl:p-5 lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full">
         <div class="p-3 w-full flex flex-col items-center rounded-2xl bg-gray-700">
           <div class="w-full flex justify-around">
             <button @click="message" class="hover:text-lightgreen focus:outline-none"><font-awesome-icon :icon="['fas', 'comment']" size="2x" /></button>
@@ -14,7 +18,7 @@
           <country-flag country='jp' rounded class="relative bottom-5 left-11" />
           <h1 class="font-bold text-3xl">{{ displayName }}</h1>
         </div>
-        <div class="p-3 mt-6 flex-grow w-full flex flex-col rounded-2xl bg-darkyellow">
+        <div class="lg:flex-grow p-3 mt-5 w-full flex flex-col rounded-2xl bg-darkyellow">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightyellow">
               <font-awesome-icon :icon="['fas', 'bullhorn']" size="2x" />
@@ -24,7 +28,7 @@
           <p class="flex-grow w-full p2">{{ selfIntroduction }}</p>
         </div>
       </div>
-      <div class="p-5 h-screen w-1/2 flex flex-col justify-between">
+      <div class="lg:flex lg:flex-col lg:justify-between xl:h-screen xl:w-1/2 w-full p-5">
         <div class="p-3 w-full flex flex-col rounded-2xl bg-darkgreen">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightgreen">
@@ -38,7 +42,7 @@
             <p>{{ learningLang1.toUpperCase() }}</p>
           </div>
         </div>
-        <div class="p-3 mt-6 flex-grow w-full flex flex-col rounded-2xl bg-darkred">
+        <div class="lg:flex-grow p-3 mt-5 w-full flex flex-col rounded-2xl bg-darkred">
           <div class="mb-2 flex items-center">
             <div class="mr-2 h-12 w-12 flex items-center justify-center rounded-lg bg-lightred">
               <font-awesome-icon :icon="['fas', 'icons']" size="2x" />
@@ -66,6 +70,8 @@ export default {
   },
   data() {
     return {
+      isNavVisible: true,
+      isNavInvisible: false,
       currentUserId: "",
       isProfileVisible: false,
       user: {},
@@ -79,9 +85,18 @@ export default {
   },
   mounted() {
     this.currentUserId = firebase.auth().currentUser.uid
+    if (matchMedia('(max-width: 640px)').matches) {
+      this.isNavInvisible = true
+    }
   },
   methods: {
+    toggleNavVisible() {
+      if (matchMedia('(max-width: 640px)').matches) {
+        this.isNavVisible = this.isNavInvisible = this.isNavVisible ? false : true
+      }
+    },
     showProfile(user) {
+      this.toggleNavVisible()
       this.isProfileVisible = true
       this.user = user
       this.displayName = user.displayName

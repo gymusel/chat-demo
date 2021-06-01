@@ -53,6 +53,12 @@ export default new Vuex.Store({
     setMessages(state, messages) {
       state.messages = messages
     },
+    resetRoom(state) {
+      state.room = {}
+      state.participants = []
+      state.room_id = ""
+      state.messages = []
+    },
     resetStates(state) {
       state.user = {}
       state.channels = []

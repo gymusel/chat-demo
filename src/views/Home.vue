@@ -1,29 +1,20 @@
 <template>
   <div class="flex">
-    <HomeNav class="w-64 border-r border-gray-700" />
-    <div class="flex-grow">
-      <div v-if="!$store.state.room_id" class="mx-80 inset-x-0 fixed h-screen z-10 flex justify-center items-center bg-gray-800">
-        Start a new conversation!
-      </div>
-      <div class="h-screen flex flex-col flex-grow">
-        <header class="border-b border-gray-700 fill-current text-gray-400">
-          <div class="flex justify-between m-3">
-            <div>
-              <div v-if="$store.state.room.displayName" class="font-bold text-lg">{{ $store.state.room.displayName }}</div>
-              <div v-if="$store.state.room.opponent" class="font-bold text-lg">{{ $store.state.room.opponent.displayName }}</div>
-              <font-awesome-icon :icon="['far', 'star']" class="h-6 w-6" />
-            </div>
-            <div class="flex items-center">
-              <font-awesome-icon :icon="['fas', 'phone-alt']" class="h-6 w-6 mx-2" />
-              <font-awesome-icon :icon="['fas', 'info-circle']" class="h-6 w-6 mx-2" />
-              <font-awesome-icon :icon="['fas', 'cog']" class="h-6 w-6 mx-2" />
-              <div class="border border-gray-700 w-64 rounded p-1 ml-2 mr-2 flex">
-                <font-awesome-icon :icon="['fas', 'search']" class="h-6 w-6" />
-                <span class="ml-2">Search</span>
-              </div>
-              <font-awesome-icon :icon="['fas', 'at']" class="h-6 w-6 mx-2" />
-              <font-awesome-icon :icon="['far', 'star']" class="h-6 w-6 mx-2" />
-            </div>
+    <HomeNav v-on:toggleNavVisible="toggleNavVisible" :class="{ 'hidden sm:inline': !isNavVisible }" class="w-full sm:w-64 border-r border-gray-700" />
+    <div :class="{ 'hidden sm:inline': isNavInvisible }" class="flex-grow">
+      <div v-if="!$store.state.room_id" class="h-screen flex justify-center items-center text-gray-400">Start a new conversation!</div>
+
+      <div v-else class="h-screen flex flex-col">
+        <header class="border-b border-gray-700 text-gray-400 flex justify-between p-3">
+          <div class="flex items-center">
+            <button @click="toggleNavVisible" class="sm:hidden mr-6 focus:outline-none"><font-awesome-icon :icon="['fas', 'angle-left']" size="2x" /></button>
+            <font-awesome-icon :icon="['far', 'star']" class="mr-3" />
+            <div v-if="$store.state.room.displayName" class="font-bold text-lg">{{ $store.state.room.displayName }}</div>
+            <div v-if="$store.state.room.opponent" class="font-bold text-lg">{{ $store.state.room.opponent.displayName }}</div>
+          </div>
+          <div class="flex items-center">
+            <font-awesome-icon :icon="['fas', 'phone-alt']" class="mx-2" />
+            <font-awesome-icon :icon="['fas', 'cog']" class="mx-2" />
           </div>
         </header>
         <main @dragenter="dragEnter" @dragleave="dragLeave" @drop.prevent="dropFile" @dragover.prevent class="flex-grow flex flex-col px-6 overflow-y-auto" ref="message_bottom">
@@ -39,7 +30,7 @@
               <img :src="photoURL(message.uid)" class="h-10 w-10 rounded-full" />
               <div class="ml-2">
                 <div class="font-bold">{{ displayName(message.uid) }}</div>
-                <img :data-src="message.url" v-if="message.url" width="360px" height="542px" class="lazyload mt-2 rounded-tr-2xl rounded-b-2xl" />
+                <img :data-src="message.url" v-if="message.url" width="320px" height="542px" class="lazyload mt-2 rounded-tr-2xl rounded-b-2xl" />
                 <div v-if="message.content" class="whitespace-pre bg-gray-500 px-2 py-1 rounded-tr-2xl rounded-b-2xl">{{ message.content }}</div>
               </div>
               <p class="mt-auto ml-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
@@ -51,7 +42,7 @@
           <p class="font-bold text-4xl">chat demoへアップロードする</p>
         </div>
 
-        <footer class=" border-t border-gray-700">
+        <footer class="mb-14 sm:mb-0 border-t border-gray-700">
           <textarea v-model="message" ref="input" @keydown.enter.exact="keyDownEnter" @keyup.enter.exact="keyUpEnter" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
           <div class="flex items-center fill-current text-gray-400 ml-6 mb-2">
             <label class="flex items-center hover:opacity-70">
@@ -84,11 +75,21 @@ export default {
   },
   data() {
     return {
+      isNavVisible: true,
+      isNavInvisible: false,
       opponents: "",
       message: "",
       file_upload_overlay: false,
       file: "",
       url: "",
+    }
+  },
+  mounted() {
+    if (matchMedia('(max-width: 640px)').matches) {
+      this.isNavInvisible = true
+    }
+    if (this.$store.state.room_id) {
+      this.toggleNavVisible()
     }
   },
   updated() {
@@ -108,6 +109,11 @@ export default {
     })
   },
   methods: {
+    toggleNavVisible() {
+      if (matchMedia('(max-width: 640px)').matches) {
+        this.isNavVisible = this.isNavInvisible = this.isNavVisible ? false : true
+      }
+    },
     howOld(timestamp) {
       const now = new Date()
       const nowHour = (`${now.getHours()}`).slice(-2)
@@ -249,6 +255,9 @@ export default {
     rows:function(){
       return this.message.split("\n").length
     },
+  },
+  beforeDestroy() {
+    this.$store.commit("resetRoom")
   },
 }
 </script>
