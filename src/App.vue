@@ -211,6 +211,9 @@ export default {
 </script>
 
 <style lang="scss">
+body {
+  overflow: hidden;
+}
 .router-link-exact-active {
   color: #3ED598;
 }
