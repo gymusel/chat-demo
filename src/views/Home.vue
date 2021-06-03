@@ -19,32 +19,45 @@
         </header>
         <main @dragenter="dragEnter" @dragleave="dragLeave" @drop.prevent="dropFile" @dragover.prevent class="flex-grow flex flex-col px-6 overflow-y-auto" ref="message_bottom">
           <div v-for="message in $store.state.messages" :key="message.key" style="pointer-events: none" class="mt-2 mb-4 flex">
-            <div v-if="message.uid==$store.state.user.uid" class="ml-auto flex items-end">
+            <div v-if="message.uid==$store.state.user.uid" class="w-full flex justify-end items-end">
               <p class="mr-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
               <div>
-                <img :data-src="message.url" v-if="message.url" width="360px" height="542px" class="lazyload mt-2 rounded-bl-2xl rounded-t-2xl" />
-                <div v-if="message.content" class="whitespace-pre bg-darkgreen px-2 py-1 rounded-bl-2xl rounded-t-2xl">{{ message.content }}</div>
+                <img :data-src="message.url" v-if="message.url" class="object-contain w-48 lazyload mt-2 rounded-bl-2xl rounded-t-2xl" />
+                <div v-if="message.content" class="max-w-48 xl:max-w-sm 2xl:max-w-md whitespace-pre-wrap bg-darkgreen px-2 py-1 rounded-bl-2xl rounded-t-2xl">{{ message.content }}</div>
               </div>
             </div>
             <div v-else class="flex">
               <img :src="photoURL(message.uid)" class="h-10 w-10 rounded-full" />
               <div class="ml-2">
                 <div class="font-bold">{{ displayName(message.uid) }}</div>
-                <img :data-src="message.url" v-if="message.url" width="320px" height="542px" class="lazyload mt-2 rounded-tr-2xl rounded-b-2xl" />
-                <div v-if="message.content" class="whitespace-pre bg-gray-500 px-2 py-1 rounded-tr-2xl rounded-b-2xl">{{ message.content }}</div>
+                <div class="flex items-end">
+                  <div>
+                    <img :data-src="message.url" v-if="message.url" class="object-contain w-48 lazyload mt-2 rounded-tr-2xl rounded-b-2xl" />
+                    <div v-if="message.content" class="max-w-48 xl:max-w-sm 2xl:max-w-md whitespace-pre-wrap bg-gray-500 px-2 py-1 rounded-tr-2xl rounded-b-2xl">{{ message.content }}</div>
+                  </div>
+                  <p class="ml-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
+                </div>
               </div>
-              <p class="mt-auto ml-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
             </div>
           </div>
         </main>
 
-        <div v-show="file_upload_overlay" style="pointer-events: none" class="mx-80 inset-x-0 fixed h-screen z-10 flex justify-center items-center bg-gray-800">
-          <p class="font-bold text-4xl">chat demoへアップロードする</p>
+        <div v-show="file_upload_overlay" style="pointer-events: none" class="fixed top-0 left-0 h-screen w-screen z-30 flex flex-col justify-center items-center bg-gray-800">
+          <p class="font-bold text-4xl">Upload photo</p>
+        </div>
+
+        <div v-show="fileUploadingModal" @click="closeFileUploadingModal" class="z-20 fixed top-0 left-0 h-full w-full flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5)">
+          <div @click.stop class="p-6 rounded-2xl bg-darkgreen">
+            <p class="font-bold text-2xl mb-6">Uploading photo</p>
+            <div class="bg-gray-800">
+              <div class="bg-lightgreen w-48 h-3" style="width:0%" ref="progress_bar" />
+            </div>
+          </div>
         </div>
 
         <footer class="mb-24 sm:mb-0 border-t border-gray-700">
-          <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="keyDownEnter" @keyup.enter.exact="sendMessageInputEvent" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
-          <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageInputEvent" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
+          <textarea v-model="message" ref="input" @keydown="sendMessageCommandEnter" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
+          <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageInputEvent" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
           <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageCompositionEvent" @compositionstart="composing=true" @compositionend="composing=false" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
           <div class="flex items-center fill-current text-gray-400 ml-6 mb-2">
             <label class="flex items-center hover:opacity-70">
@@ -82,6 +95,7 @@ export default {
       opponents: "",
       message: "",
       file_upload_overlay: false,
+      fileUploadingModal: false,
       file: "",
       url: "",
     }
@@ -193,47 +207,47 @@ export default {
           unread: this.opponents,
         })
         firebase.database().ref("channel").child(this.$store.state.room_id).update({
-          newestMessage: this.message,
+          newestMessage: this.message.substring(0, 10) + "...",
           "updatedAt": firebase.database.ServerValue.TIMESTAMP,
         })
       } else {
+        this.fileUploadingModal = true
         const storageRef = firebase.storage().ref("images/" + this.file.name)
         const uploadTask = storageRef.put(this.file)
         uploadTask.on(
           "state_changed",
-          // (snapshot) => {
-          //   let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          //   this.$refs.progress_bar.style.width = percentage + "%"
-          // },
-          // (error) => {
-          //   console.log(error)
-          // },
+          (snapshot) => {
+            let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            this.$refs.progress_bar.style.width = percentage + "%"
+          },
+          (error) => {
+            console.log(error)
+          },
           () => {
             storageRef.getDownloadURL().then((url) => {
               newMessage.set({
                 key: key_id,
                 uid: this.$store.state.user.uid,
+                content: this.message,
                 url: url,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 unread: this.opponents,
               })
             })
+            this.fileUploadingModal = false
           }
         )
         firebase.database().ref("channel").child(this.$store.state.room_id).update({
-          newestMessage: "Image sent",
+          newestMessage: this.$store.state.user.displayName + " sent an image",
           "updatedAt": firebase.database.ServerValue.TIMESTAMP,
         })
       }
       this.message = this.url = this.file = ""
     },
-    sendMessageInputEvent() {
-      event.preventDefault()
-      if (event.isComposing){
-        console.log("文字変換")
-      } else if (this.message === "" && !this.file) {
+    sendMessageCommandEnter() {
+      if (this.message === "" && !this.file) {
         console.log("message and file are blank")
-      } else {
+      } else if (((event.ctrlKey && !event.metaKey) || (!event.ctrlKey && event.metaKey)) && event.keyCode == 13) {
         const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
         const key_id = newMessage.key
 
@@ -246,96 +260,164 @@ export default {
             unread: this.opponents,
           })
           firebase.database().ref("channel").child(this.$store.state.room_id).update({
-            newestMessage: this.message,
+            newestMessage: this.message.substring(0, 10) + "...",
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
           })
         } else {
+          this.fileUploadingModal = true
           const storageRef = firebase.storage().ref("images/" + this.file.name)
           const uploadTask = storageRef.put(this.file)
           uploadTask.on(
             "state_changed",
-            // (snapshot) => {
-            //   let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            //   this.$refs.progress_bar.style.width = percentage + "%"
-            // },
-            // (error) => {
-            //   console.log(error)
-            // },
+            (snapshot) => {
+              let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              this.$refs.progress_bar.style.width = percentage + "%"
+            },
+            (error) => {
+              console.log(error)
+            },
             () => {
               storageRef.getDownloadURL().then((url) => {
                 newMessage.set({
                   key: key_id,
                   uid: this.$store.state.user.uid,
+                  content: this.message,
                   url: url,
                   createdAt: firebase.database.ServerValue.TIMESTAMP,
                   unread: this.opponents,
                 })
               })
+              this.fileUploadingModal = false
             }
           )
           firebase.database().ref("channel").child(this.$store.state.room_id).update({
-            newestMessage: "Image sent",
+            newestMessage: this.$store.state.user.displayName + " sent an image",
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
           })
         }
         this.message = this.url = this.file = ""
-      }
-    },
-    sendMessageCompositionEvent() {
-      event.preventDefault()
-      console.log(this.composing)
-      if (this.composing){
-        console.log("文字変換")
-      } else if (this.message === "" && !this.file) {
-        console.log("message and file are blank")
       } else {
-        const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
-        const key_id = newMessage.key
-
-        if (!this.file) {
-          newMessage.set({
-            key: key_id,
-            content: this.message,
-            uid: this.$store.state.user.uid,
-            createdAt: firebase.database.ServerValue.TIMESTAMP,
-            unread: this.opponents,
-          })
-          firebase.database().ref("channel").child(this.$store.state.room_id).update({
-            newestMessage: this.message,
-            "updatedAt": firebase.database.ServerValue.TIMESTAMP,
-          })
-        } else {
-          const storageRef = firebase.storage().ref("images/" + this.file.name)
-          const uploadTask = storageRef.put(this.file)
-          uploadTask.on(
-            "state_changed",
-            // (snapshot) => {
-            //   let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            //   this.$refs.progress_bar.style.width = percentage + "%"
-            // },
-            // (error) => {
-            //   console.log(error)
-            // },
-            () => {
-              storageRef.getDownloadURL().then((url) => {
-                newMessage.set({
-                  key: key_id,
-                  uid: this.$store.state.user.uid,
-                  url: url,
-                  createdAt: firebase.database.ServerValue.TIMESTAMP,
-                  unread: this.opponents,
-                })
-              })
-            }
-          )
-          firebase.database().ref("channel").child(this.$store.state.room_id).update({
-            newestMessage: "Image sent",
-            "updatedAt": firebase.database.ServerValue.TIMESTAMP,
-          })
-        }
-        this.message = this.url = this.file = ""
+        console.log("not command + enter")
       }
     },
+    // sendMessageInputEvent() {
+    //   event.preventDefault()
+    //   if (event.isComposing){
+    //     console.log("文字変換")
+    //   } else if (this.message === "" && !this.file) {
+    //     console.log("message and file are blank")
+    //   } else {
+    //     const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
+    //     const key_id = newMessage.key
+
+    //     if (!this.file) {
+    //       newMessage.set({
+    //         key: key_id,
+    //         content: this.message,
+    //         uid: this.$store.state.user.uid,
+    //         createdAt: firebase.database.ServerValue.TIMESTAMP,
+    //         unread: this.opponents,
+    //       })
+    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
+    //         newestMessage: this.message.substring(0, 10) + "...",
+    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+    //       })
+    //     } else {
+    //       this.fileUploadingModal = true
+    //       const storageRef = firebase.storage().ref("images/" + this.file.name)
+    //       const uploadTask = storageRef.put(this.file)
+    //       uploadTask.on(
+    //         "state_changed",
+    //         (snapshot) => {
+    //           let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+    //           this.$refs.progress_bar.style.width = percentage + "%"
+    //         },
+    //         (error) => {
+    //           console.log(error)
+    //         },
+    //         () => {
+    //           storageRef.getDownloadURL().then((url) => {
+    //             newMessage.set({
+    //               key: key_id,
+    //               uid: this.$store.state.user.uid,
+    //               content: this.message,
+    //               url: url,
+    //               createdAt: firebase.database.ServerValue.TIMESTAMP,
+    //               unread: this.opponents,
+    //             })
+    //           })
+    //           this.fileUploadingModal = false
+    //         }
+    //       )
+    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
+    //         newestMessage: "Image sent",
+    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+    //       })
+    //     }
+    //     this.message = this.url = this.file = ""
+    //   }
+    // },
+    // sendMessageCompositionEvent() {
+    //   event.preventDefault()
+    //   console.log(this.composing)
+    //   if (this.composing){
+    //     console.log("文字変換")
+    //   } else if (this.message === "" && !this.file) {
+    //     console.log("message and file are blank")
+    //   } else {
+    //     const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
+    //     const key_id = newMessage.key
+
+    //     if (!this.file) {
+    //       newMessage.set({
+    //         key: key_id,
+    //         content: this.message,
+    //         uid: this.$store.state.user.uid,
+    //         createdAt: firebase.database.ServerValue.TIMESTAMP,
+    //         unread: this.opponents,
+    //       })
+    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
+    //         newestMessage: this.message.substring(0, 10) + "...",
+    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+    //       })
+    //     } else {
+    //       this.fileUploadingModal = true
+    //       const storageRef = firebase.storage().ref("images/" + this.file.name)
+    //       const uploadTask = storageRef.put(this.file)
+    //       uploadTask.on(
+    //         "state_changed",
+    //         (snapshot) => {
+    //           let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+    //           this.$refs.progress_bar.style.width = percentage + "%"
+    //         },
+    //         (error) => {
+    //           console.log(error)
+    //         },
+    //         () => {
+    //           storageRef.getDownloadURL().then((url) => {
+    //             newMessage.set({
+    //               key: key_id,
+    //               uid: this.$store.state.user.uid,
+    //               content: this.message,
+    //               url: url,
+    //               createdAt: firebase.database.ServerValue.TIMESTAMP,
+    //               unread: this.opponents,
+    //             })
+    //           })
+    //           this.fileUploadingModal = false
+    //         }
+    //       )
+    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
+    //         newestMessage: "Image sent",
+    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+    //       })
+    //     }
+    //     this.message = this.url = this.file = ""
+    //   }
+    // },
+    closeFileUploadingModal() {
+      this.fileUploadingModal = false
+    }
   },
   computed: {
     photoURL: function() {
