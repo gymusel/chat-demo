@@ -22,8 +22,8 @@
             <div v-if="message.uid==$store.state.user.uid" class="w-full flex justify-end items-end">
               <p class="mr-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
               <div>
-                <img :data-src="message.url" v-if="message.url" class="object-contain w-48 lazyload mt-2 rounded-bl-2xl rounded-t-2xl" />
-                <div v-if="message.content" class="max-w-48 xl:max-w-sm 2xl:max-w-md whitespace-pre-wrap bg-darkgreen px-2 py-1 rounded-bl-2xl rounded-t-2xl">{{ message.content }}</div>
+                <img :data-src="message.url" v-if="message.url" class="lazyload object-cover w-48 xl:w-96 h-48 xl:h-96 mt-2 rounded-bl-2xl rounded-t-2xl" />
+                <div v-if="message.content" class="max-w-48 xl:max-w-sm 2xl:max-w-md break-words whitespace-pre-wrap bg-darkgreen px-2 py-1 rounded-bl-2xl rounded-t-2xl">{{ message.content }}</div>
               </div>
             </div>
             <div v-else class="flex">
@@ -32,8 +32,8 @@
                 <div class="font-bold">{{ displayName(message.uid) }}</div>
                 <div class="flex items-end">
                   <div>
-                    <img :data-src="message.url" v-if="message.url" class="object-contain w-48 lazyload mt-2 rounded-tr-2xl rounded-b-2xl" />
-                    <div v-if="message.content" class="max-w-48 xl:max-w-sm 2xl:max-w-md whitespace-pre-wrap bg-gray-500 px-2 py-1 rounded-tr-2xl rounded-b-2xl">{{ message.content }}</div>
+                    <img :data-src="message.url" v-if="message.url" class="lazyload object-cover w-48 xl:w-96 h-48 xl:h-96 mt-2 rounded-tr-2xl rounded-b-2xl" />
+                    <div v-if="message.content" class="max-w-48 xl:max-w-sm 2xl:max-w-md break-words whitespace-pre-wrap bg-gray-500 px-2 py-1 rounded-tr-2xl rounded-b-2xl">{{ message.content }}</div>
                   </div>
                   <p class="ml-2 font-thin text-xs text-gray-400">{{ howOld(message.createdAt) }}</p>
                 </div>
