@@ -10,7 +10,8 @@
             <button @click="toggleNavVisible" class="sm:hidden mr-6 focus:outline-none"><font-awesome-icon :icon="['fas', 'angle-left']" size="2x" /></button>
             <font-awesome-icon :icon="['far', 'star']" class="mr-3" />
             <div v-if="$store.state.room.displayName" class="font-bold text-lg">{{ $store.state.room.displayName }}</div>
-            <div v-if="$store.state.room.opponent" class="font-bold text-lg">{{ $store.state.room.opponent.displayName }}</div>
+            <!-- <div v-if="$store.state.room.opponent" class="font-bold text-lg">{{ $store.state.room.opponent.displayName }}</div> -->
+            <div v-if="$store.state.participants.length == 2" class="font-bold text-lg">{{ $store.state.participants[1].displayName }}</div>
           </div>
           <div class="flex items-center">
             <font-awesome-icon :icon="['fas', 'phone-alt']" class="mx-2" />
@@ -56,7 +57,7 @@
         </div>
 
         <footer class="mb-24 sm:mb-0 border-t border-gray-700">
-          <textarea v-model="message" ref="input" @keydown="sendMessageCommandEnter" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
+          <textarea v-model="message" ref="input" @keydown.enter="sendMessageCommandEnter" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
           <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageInputEvent" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
           <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageCompositionEvent" @compositionstart="composing=true" @compositionend="composing=false" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
           <div class="flex items-center fill-current text-gray-400 ml-6 mb-2">
@@ -198,17 +199,39 @@ export default {
       const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
       const key_id = newMessage.key
 
+      // let newMessagesCounts = this.$store.state.room.newMessagesCounts
+      // for (let uid in newMessagesCounts) {
+      //   if (uid != this.$store.state.user.uid) {
+      //     newMessagesCounts[uid]++
+      //   }
+      // }
+      let newMessagesCounts = {}
+      firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
+        newMessagesCounts = snap.val().newMessagesCounts
+        // console.log(snap.val().newMessagesCounts)
+        for (let uid in newMessagesCounts) {
+          if (uid != this.$store.state.user.uid) {
+            newMessagesCounts[uid]++
+          } else {
+            newMessagesCounts[uid] = 0
+          }
+        }
+      })
+
       if (!this.file) {
         newMessage.set({
           key: key_id,
           content: this.message,
           uid: this.$store.state.user.uid,
           createdAt: firebase.database.ServerValue.TIMESTAMP,
-          unread: this.opponents,
         })
+        if (this.message.length > 10) {
+          this.message = this.message.substring(0, 10) + "..."
+        }
         firebase.database().ref("channel").child(this.$store.state.room_id).update({
-          newestMessage: this.message.substring(0, 10) + "...",
+          newestMessage: this.message,
           "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+          newMessagesCounts: newMessagesCounts,
         })
       } else {
         this.fileUploadingModal = true
@@ -231,7 +254,6 @@ export default {
                 content: this.message,
                 url: url,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
-                unread: this.opponents,
               })
             })
             this.fileUploadingModal = false
@@ -240,6 +262,7 @@ export default {
         firebase.database().ref("channel").child(this.$store.state.room_id).update({
           newestMessage: this.$store.state.user.displayName + " sent an image",
           "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+          newMessagesCounts: newMessagesCounts,
         })
       }
       this.message = this.url = this.file = ""
@@ -251,17 +274,32 @@ export default {
         const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
         const key_id = newMessage.key
 
+        let newMessagesCounts = {}
+        firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
+          newMessagesCounts = snap.val().newMessagesCounts
+          for (let uid in newMessagesCounts) {
+            if (uid != this.$store.state.user.uid) {
+              newMessagesCounts[uid]++
+            } else {
+              newMessagesCounts[uid] = 0
+            }
+          }
+        })
+
         if (!this.file) {
           newMessage.set({
             key: key_id,
             content: this.message,
             uid: this.$store.state.user.uid,
             createdAt: firebase.database.ServerValue.TIMESTAMP,
-            unread: this.opponents,
           })
+          if (this.message.length > 10) {
+            this.message = this.message.substring(0, 10) + "..."
+          }
           firebase.database().ref("channel").child(this.$store.state.room_id).update({
-            newestMessage: this.message.substring(0, 10) + "...",
+            newestMessage: this.message,
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+            newMessagesCounts: newMessagesCounts,
           })
         } else {
           this.fileUploadingModal = true
@@ -284,7 +322,6 @@ export default {
                   content: this.message,
                   url: url,
                   createdAt: firebase.database.ServerValue.TIMESTAMP,
-                  unread: this.opponents,
                 })
               })
               this.fileUploadingModal = false
@@ -293,6 +330,7 @@ export default {
           firebase.database().ref("channel").child(this.$store.state.room_id).update({
             newestMessage: this.$store.state.user.displayName + " sent an image",
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+            newMessagesCounts: newMessagesCounts,
           })
         }
         this.message = this.url = this.file = ""
@@ -300,121 +338,78 @@ export default {
         console.log("not command + enter")
       }
     },
-    // sendMessageInputEvent() {
-    //   event.preventDefault()
-    //   if (event.isComposing){
-    //     console.log("文字変換")
-    //   } else if (this.message === "" && !this.file) {
-    //     console.log("message and file are blank")
-    //   } else {
-    //     const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
-    //     const key_id = newMessage.key
+    sendMessageInputEvent() {
+      event.preventDefault()
+      if (event.isComposing){
+        console.log("文字変換")
+      } else if (this.message === "" && !this.file) {
+        console.log("message and file are blank")
+      } else {
+        const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
+        const key_id = newMessage.key
 
-    //     if (!this.file) {
-    //       newMessage.set({
-    //         key: key_id,
-    //         content: this.message,
-    //         uid: this.$store.state.user.uid,
-    //         createdAt: firebase.database.ServerValue.TIMESTAMP,
-    //         unread: this.opponents,
-    //       })
-    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
-    //         newestMessage: this.message.substring(0, 10) + "...",
-    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
-    //       })
-    //     } else {
-    //       this.fileUploadingModal = true
-    //       const storageRef = firebase.storage().ref("images/" + this.file.name)
-    //       const uploadTask = storageRef.put(this.file)
-    //       uploadTask.on(
-    //         "state_changed",
-    //         (snapshot) => {
-    //           let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-    //           this.$refs.progress_bar.style.width = percentage + "%"
-    //         },
-    //         (error) => {
-    //           console.log(error)
-    //         },
-    //         () => {
-    //           storageRef.getDownloadURL().then((url) => {
-    //             newMessage.set({
-    //               key: key_id,
-    //               uid: this.$store.state.user.uid,
-    //               content: this.message,
-    //               url: url,
-    //               createdAt: firebase.database.ServerValue.TIMESTAMP,
-    //               unread: this.opponents,
-    //             })
-    //           })
-    //           this.fileUploadingModal = false
-    //         }
-    //       )
-    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
-    //         newestMessage: "Image sent",
-    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
-    //       })
-    //     }
-    //     this.message = this.url = this.file = ""
-    //   }
-    // },
-    // sendMessageCompositionEvent() {
-    //   event.preventDefault()
-    //   console.log(this.composing)
-    //   if (this.composing){
-    //     console.log("文字変換")
-    //   } else if (this.message === "" && !this.file) {
-    //     console.log("message and file are blank")
-    //   } else {
-    //     const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
-    //     const key_id = newMessage.key
+        let newMessagesCounts = {}
+        firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
+          newMessagesCounts = snap.val().newMessagesCounts
+          for (let uid in newMessagesCounts) {
+            if (uid != this.$store.state.user.uid) {
+              newMessagesCounts[uid]++
+            } else {
+              newMessagesCounts[uid] = 0
+            }
+          }
+        })
 
-    //     if (!this.file) {
-    //       newMessage.set({
-    //         key: key_id,
-    //         content: this.message,
-    //         uid: this.$store.state.user.uid,
-    //         createdAt: firebase.database.ServerValue.TIMESTAMP,
-    //         unread: this.opponents,
-    //       })
-    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
-    //         newestMessage: this.message.substring(0, 10) + "...",
-    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
-    //       })
-    //     } else {
-    //       this.fileUploadingModal = true
-    //       const storageRef = firebase.storage().ref("images/" + this.file.name)
-    //       const uploadTask = storageRef.put(this.file)
-    //       uploadTask.on(
-    //         "state_changed",
-    //         (snapshot) => {
-    //           let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-    //           this.$refs.progress_bar.style.width = percentage + "%"
-    //         },
-    //         (error) => {
-    //           console.log(error)
-    //         },
-    //         () => {
-    //           storageRef.getDownloadURL().then((url) => {
-    //             newMessage.set({
-    //               key: key_id,
-    //               uid: this.$store.state.user.uid,
-    //               content: this.message,
-    //               url: url,
-    //               createdAt: firebase.database.ServerValue.TIMESTAMP,
-    //               unread: this.opponents,
-    //             })
-    //           })
-    //           this.fileUploadingModal = false
-    //         }
-    //       )
-    //       firebase.database().ref("channel").child(this.$store.state.room_id).update({
-    //         newestMessage: "Image sent",
-    //         "updatedAt": firebase.database.ServerValue.TIMESTAMP,
-    //       })
-    //     }
-    //     this.message = this.url = this.file = ""
-    //   }
-    // },
+        if (!this.file) {
+          newMessage.set({
+            key: key_id,
+            content: this.message,
+            uid: this.$store.state.user.uid,
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+          })
+          if (this.message.length > 10) {
+            this.message = this.message.substring(0, 10) + "..."
+          }
+          firebase.database().ref("channel").child(this.$store.state.room_id).update({
+            newestMessage: this.message,
+            "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+            newMessagesCounts: newMessagesCounts,
+          })
+        } else {
+          this.fileUploadingModal = true
+          const storageRef = firebase.storage().ref("images/" + this.file.name)
+          const uploadTask = storageRef.put(this.file)
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              this.$refs.progress_bar.style.width = percentage + "%"
+            },
+            (error) => {
+              console.log(error)
+            },
+            () => {
+              storageRef.getDownloadURL().then((url) => {
+                newMessage.set({
+                  key: key_id,
+                  uid: this.$store.state.user.uid,
+                  content: this.message,
+                  url: url,
+                  createdAt: firebase.database.ServerValue.TIMESTAMP,
+                })
+              })
+              this.fileUploadingModal = false
+            }
+          )
+          firebase.database().ref("channel").child(this.$store.state.room_id).update({
+            newestMessage: "Image sent",
+            "updatedAt": firebase.database.ServerValue.TIMESTAMP,
+            newMessagesCounts: newMessagesCounts,
+          })
+        }
+        this.message = this.url = this.file = ""
+      }
+    },
     closeFileUploadingModal() {
       this.fileUploadingModal = false
     }

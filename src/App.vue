@@ -93,6 +93,7 @@ export default {
         )
         changedChannel[0].updatedAt = snapshot.val().updatedAt
         changedChannel[0].newestMessage = snapshot.val().newestMessage
+        changedChannel[0].newMessagesCounts[this.uid] = snapshot.val().newMessagesCounts[this.uid]
         channels.push(changedChannel)
       })
       this.$store.commit("setChannels", channels)

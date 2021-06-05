@@ -110,18 +110,29 @@ export default {
       const roomId = this.currentUserId > this.user.uid ? (this.currentUserId + "-" + this.user.uid) : (this.user.uid + "-" + this.currentUserId)
       
       let newChannel = firebase.database().ref("channel").child(roomId)
-      
-      newChannel.set({
-        users: [this.currentUserId,this.user.uid],
-        id: roomId,
-        updatedAt: firebase.database.ServerValue.TIMESTAMP,
-      })
 
+      let isNotExist = true
       this.$store.state.channels.forEach(function(channel) {
         if (channel.id == roomId) {
+          isNotExist = false
           newChannel = channel
         }
       })
+      if (isNotExist) {
+        const newMessagesCounts = {
+          [this.currentUserId]: 0,
+          [this.user.uid]: 0,
+        }
+        newChannel.set({
+          users: [this.currentUserId, this.user.uid],
+          id: roomId,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP,
+          newMessagesCounts: newMessagesCounts,
+        })
+        firebase.database().ref("channel").child(roomId).once("value", (snap) => {
+          newChannel = snap.val()
+        })
+      }
       
       this.$store.commit("setRoom", newChannel)
 
@@ -139,6 +150,19 @@ export default {
         messages.push(snapshot.val())
       })
       this.$store.commit("setMessages", messages)
+
+      let newMessagesCounts = {}
+      firebase.database().ref("channel").child(roomId).once("value", (snap) => {
+        newMessagesCounts = snap.val().newMessagesCounts
+        for (let uid in newMessagesCounts) {
+          if (uid == this.currentUserId) {
+            newMessagesCounts[uid] = 0
+          }
+        }
+        firebase.database().ref("channel").child(roomId).update({
+          newMessagesCounts: newMessagesCounts,
+        })
+      })
 
       this.$router.push('/')
     },

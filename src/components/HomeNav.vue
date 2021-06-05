@@ -29,7 +29,7 @@
             </div>
             <div class="w-full flex justify-between items-center">
               <p class="font-thin text-xs">{{ channel.newestMessage }}</p>
-              <!-- <div class="font-light text-xs bg-lightgreen h-4 w-4 rounded-full">3</div> -->
+              <div v-if="newMessagesCount(channel.newMessagesCounts)" class="font-light text-xs bg-lightgreen h-4 w-4 rounded-full">{{ newMessagesCount(channel.newMessagesCounts) }}</div>
             </div>
           </div>
         </button>
@@ -60,7 +60,7 @@
       <div class="mb-24 sm:mb-0 mt-auto w-full px-2">
         <input type="text" v-if="checkedUsers.length >= 3" v-model="channel" placeholder="Enter a chat room name" class="my-3 p-2 w-full h-12 rounded bg-gray-700 focus:outline-none" />
         <p class="font-semibold text-lightred">{{ error }}</p>
-        <button @click="addChannel" class="font-bold text-xl my-3 p-2 w-full h-12 rounded bg-lightgreen hover:bg-darkgreen focus:outline-none">Start a conversation!</button>
+        <button @click="createChannel" class="font-bold text-xl my-3 p-2 w-full h-12 rounded bg-lightgreen hover:bg-darkgreen focus:outline-none">Start a conversation!</button>
       </div>
     </div>
 
@@ -97,49 +97,11 @@ export default {
         return (textA < textB) ? -1 : (textA > textB) ? 1 : 0
       })
     },
-    // photoURL: function() {
-    //   return function(participants) {
-    //     const self = this
-    //     let photoURL = ""
-    //     participants.forEach(function(participant) {
-    //       if (participant.uid != self.uid) {
-    //         if (participant.photoURL) {
-    //           photoURL = participant.photoURL
-    //         } else {
-    //           photoURL = ""
-    //         }
-    //       }
-    //     })
-    //     return photoURL
-    //   }
-    // },
-    // displayName: function() {
-    //   return function(participants) {
-    //     const self = this
-    //     let displayName = ""
-    //     participants.forEach(function(participant) {
-    //       if (participant.uid != self.uid) {
-    //         displayName = participant.displayName
-    //       }
-    //     })
-    //     return displayName
-    //   }
-    // },
-    // countUnread: function() {
-    //   const self = this
-    //   return function(uid) {
-    //     let countUnread = 0
-    //     const messageId = self.uid > uid ? (self.uid + "-" + uid) : (uid + "-" + self.uid)
-    //     firebase.database().ref("messages").child(messageId).once("child_added", (snapshot) => {
-    //       if (snapshot.val().unread == self.uid) {
-    //         countUnread = countUnread + 1
-    //       }
-    //       // console.log(snapshot.val())
-    //     })
-    //     // console.log(countUnread)
-    //     return countUnread
-    //   }
-    // },
+    newMessagesCount: function() {
+      return function(newMessagesCounts) {
+        return newMessagesCounts[this.uid]
+      }
+    },
   },
   methods: {
     toggleRoomSelect() {
@@ -188,78 +150,120 @@ export default {
         this.checkedUsers.push(uid)
       }
     },
-    addChannel() {
+    createChannel() {
       if (this.checkedUsers.length >= 3) {
         if (this.channel == "") {
           this.error = "Please enter a chat room name."
         } else {
-          const newChannel = firebase.database().ref("channel").push()
+          let newChannel = firebase.database().ref("channel").push()
+          const roomId = newChannel.key
 
-          const key_id = newChannel.key
+          let newMessagesCounts = {}
+          for (let i = 0; i < this.checkedUsers.length; i++) {
+            newMessagesCounts[this.checkedUsers[i]] = 0
+          }
 
-          newChannel
-            .set({
-              displayName: this.channel,
-              users: this.checkedUsers,
-              id: key_id,
-              updatedAt: firebase.database.ServerValue.TIMESTAMP,
+          newChannel.set({
+            displayName: this.channel,
+            users: this.checkedUsers,
+            id: roomId,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            newMessagesCounts: newMessagesCounts,
+          })
+          firebase.database().ref("channel").child(roomId).once("value", (snap) => {
+            newChannel = snap.val()
+          })
+          this.$store.commit("setRoom", newChannel)
+          this.$store.commit("setRoomId", roomId)
+          let participants = []
+          const self = this
+          firebase.database().ref("users").once('child_added', function(snapshot) {
+            self.checkedUsers.forEach(function(user) {
+              if (user.uid == snapshot.val().uid) {
+                participants.push(snapshot.val())
+              }
             })
-            .then(() => {
-              this.channelModal = false
-            })
-
-          this.channel = ""
-          this.checkedUsers = [this.uid]
+          })
+          this.$store.commit("setParticipants", participants)
+          if (roomId) {
+            firebase.database().ref("messages").child(roomId).off()
+          }
+          let messages = []
+          firebase.database().ref("messages").child(roomId).on("child_added", (snapshot) => {
+            messages.push(snapshot.val())
+          })
+          this.$store.commit("setMessages", messages)
 
           this.toggleRoomSelect()
-
           this.$emit('toggleNavVisible')
+          this.channel = ""
+          this.checkedUsers = [this.uid]
         }
       } else {
         const self = this
-        let user = {}
-        this.$store.state.users.forEach(function(item) {
-          if (item.uid == self.checkedUsers[1]) {
-            user = item
+        let opponent = {}
+        this.$store.state.users.forEach(function(user) {
+          if (user.uid == self.checkedUsers[1]) {
+            opponent = user
           }
         })
 
-        const roomId = this.uid > user.uid ? (this.uid + "-" + user.uid) : (user.uid + "-" + this.uid)
-      
+        const roomId = this.uid > opponent.uid ? (this.uid + "-" + opponent.uid) : (opponent.uid + "-" + this.uid)
         let newChannel = firebase.database().ref("channel").child(roomId)
         
-        newChannel.set({
-          users: [this.uid,user.uid],
-          id: roomId,
-          updatedAt: firebase.database.ServerValue.TIMESTAMP,
-        })
 
+        let isNotExist = true
         this.$store.state.channels.forEach(function(channel) {
           if (channel.id == roomId) {
+            isNotExist = false
             newChannel = channel
           }
         })
+        if (isNotExist) {
+          const newMessagesCounts = {
+            [this.uid]: 0,
+            [opponent.uid]: 0,
+          }
+          newChannel.set({
+            users: [this.uid, opponent.uid],
+            id: roomId,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            newMessagesCounts: newMessagesCounts,
+          })
+          firebase.database().ref("channel").child(roomId).once("value", (snap) => {
+            newChannel = snap.val()
+          })
+        }
         
         this.$store.commit("setRoom", newChannel)
-
         this.$store.commit("setRoomId", roomId)
-
-        const participants = [this.$store.state.user, user]
+        const participants = [this.$store.state.user, opponent]
         this.$store.commit("setParticipants", participants)
-
         if (roomId) {
           firebase.database().ref("messages").child(roomId).off()
         }
-
         let messages = []
         firebase.database().ref("messages").child(roomId).on("child_added", (snapshot) => {
           messages.push(snapshot.val())
         })
         this.$store.commit("setMessages", messages)
 
-        this.toggleRoomSelect()
+        let newMessagesCounts = {}
+        firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
+          newMessagesCounts = snap.val().newMessagesCounts
+          for (let uid in newMessagesCounts) {
+            if (uid == this.uid) {
+              newMessagesCounts[uid] = 0
+            }
+          }
+          firebase.database().ref("channel").child(this.$store.state.room_id).update({
+            newMessagesCounts: newMessagesCounts,
+          })
+        })
 
+        this.toggleRoomSelect()
         this.$emit('toggleNavVisible')
+        this.checkedUsers = [this.uid]
       }
     },
     message(channel) {
@@ -286,6 +290,19 @@ export default {
         messages.push(snapshot.val())
       })
       this.$store.commit("setMessages", messages)
+
+      let newMessagesCounts = {}
+      firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
+        newMessagesCounts = snap.val().newMessagesCounts
+        for (let uid in newMessagesCounts) {
+          if (uid == this.uid) {
+            newMessagesCounts[uid] = 0
+          }
+        }
+        firebase.database().ref("channel").child(this.$store.state.room_id).update({
+          newMessagesCounts: newMessagesCounts,
+        })
+      })
 
       this.$emit('toggleNavVisible')
     },
