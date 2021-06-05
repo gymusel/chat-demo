@@ -199,20 +199,23 @@ export default {
       const newMessage = firebase.database().ref("messages").child(this.$store.state.room_id).push()
       const key_id = newMessage.key
 
-      // let newMessagesCounts = this.$store.state.room.newMessagesCounts
-      // for (let uid in newMessagesCounts) {
-      //   if (uid != this.$store.state.user.uid) {
-      //     newMessagesCounts[uid]++
-      //   }
-      // }
       let newMessagesCounts = {}
+      let newMessagesCount = this.$store.state.user.newMessagesCount
       firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
         newMessagesCounts = snap.val().newMessagesCounts
-        // console.log(snap.val().newMessagesCounts)
         for (let uid in newMessagesCounts) {
           if (uid != this.$store.state.user.uid) {
             newMessagesCounts[uid]++
+            let newMessagesCount = 0
+            const user = firebase.database().ref("users").child(uid)
+            user.once("value", (s) => {
+              newMessagesCount = s.val().newMessagesCount + 1
+            })
+            user.update({
+              newMessagesCount: newMessagesCount,
+            })
           } else {
+            newMessagesCount = newMessagesCount - newMessagesCounts[uid]
             newMessagesCounts[uid] = 0
           }
         }
@@ -232,6 +235,9 @@ export default {
           newestMessage: this.message,
           "updatedAt": firebase.database.ServerValue.TIMESTAMP,
           newMessagesCounts: newMessagesCounts,
+        })
+        firebase.database().ref("users").child(this.$store.state.user.uid).update({
+          newMessagesCount: newMessagesCount,
         })
       } else {
         this.fileUploadingModal = true
@@ -264,6 +270,9 @@ export default {
           "updatedAt": firebase.database.ServerValue.TIMESTAMP,
           newMessagesCounts: newMessagesCounts,
         })
+        firebase.database().ref("users").child(this.$store.state.user.uid).update({
+          newMessagesCount: newMessagesCount,
+        })
       }
       this.message = this.url = this.file = ""
     },
@@ -275,12 +284,22 @@ export default {
         const key_id = newMessage.key
 
         let newMessagesCounts = {}
+        let newMessagesCount = this.$store.state.user.newMessagesCount
         firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
           newMessagesCounts = snap.val().newMessagesCounts
           for (let uid in newMessagesCounts) {
             if (uid != this.$store.state.user.uid) {
               newMessagesCounts[uid]++
+              let newMessagesCount = 0
+              const user = firebase.database().ref("users").child(uid)
+              user.once("value", (s) => {
+                newMessagesCount = s.val().newMessagesCount + 1
+              })
+              user.update({
+                newMessagesCount: newMessagesCount,
+              })
             } else {
+              newMessagesCount = newMessagesCount - newMessagesCounts[uid]
               newMessagesCounts[uid] = 0
             }
           }
@@ -300,6 +319,9 @@ export default {
             newestMessage: this.message,
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
             newMessagesCounts: newMessagesCounts,
+          })
+          firebase.database().ref("users").child(this.$store.state.user.uid).update({
+            newMessagesCount: newMessagesCount,
           })
         } else {
           this.fileUploadingModal = true
@@ -332,6 +354,9 @@ export default {
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
             newMessagesCounts: newMessagesCounts,
           })
+          firebase.database().ref("users").child(this.$store.state.user.uid).update({
+            newMessagesCount: newMessagesCount,
+          })
         }
         this.message = this.url = this.file = ""
       } else {
@@ -349,12 +374,22 @@ export default {
         const key_id = newMessage.key
 
         let newMessagesCounts = {}
+        let newMessagesCount = this.$store.state.user.newMessagesCount
         firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
           newMessagesCounts = snap.val().newMessagesCounts
           for (let uid in newMessagesCounts) {
             if (uid != this.$store.state.user.uid) {
               newMessagesCounts[uid]++
+              let newMessagesCount = 0
+              const user = firebase.database().ref("users").child(uid)
+              user.once("value", (s) => {
+                newMessagesCount = s.val().newMessagesCount + 1
+              })
+              user.update({
+                newMessagesCount: newMessagesCount,
+              })
             } else {
+              newMessagesCount = newMessagesCount - newMessagesCounts[uid]
               newMessagesCounts[uid] = 0
             }
           }
@@ -374,6 +409,9 @@ export default {
             newestMessage: this.message,
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
             newMessagesCounts: newMessagesCounts,
+          })
+          firebase.database().ref("users").child(this.$store.state.user.uid).update({
+            newMessagesCount: newMessagesCount,
           })
         } else {
           this.fileUploadingModal = true
@@ -405,6 +443,9 @@ export default {
             newestMessage: "Image sent",
             "updatedAt": firebase.database.ServerValue.TIMESTAMP,
             newMessagesCounts: newMessagesCounts,
+          })
+          firebase.database().ref("users").child(this.$store.state.user.uid).update({
+            newMessagesCount: newMessagesCount,
           })
         }
         this.message = this.url = this.file = ""

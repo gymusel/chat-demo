@@ -5,14 +5,15 @@
     <div v-show="!loading" class="h-screen flex">
       <!-- apparently $store.state.user below becomes null after loging out and throw an error -->
       <div v-if="$store.state.user.uid" class="fixed sm:static bottom-0 w-screen sm:w-14 sm:h-screen py-5 sm:py-0 rounded-t-3xl sm:rounded-none z-10 flex sm:flex-col justify-around sm:justify-start items-center bg-gray-900 text-gray-700">
-        <router-link to="/profile" class="order-last sm:order-none w-10 h-10 m-2 hover:opacity-75 focus:outline-none">
+        <router-link to="/profile" class="order-last sm:order-none w-10 h-10 m-3 hover:opacity-75 focus:outline-none">
           <img :src="$store.state.user.photoURL" v-if="$store.state.user.photoURL" class="rounded-full" />
           <img src="@/assets/logo.png" v-else class="rounded-full" />
         </router-link>
-        <router-link to="/friends" class="m-2 hover:opacity-75 focus:outline-none">
+        <router-link to="/friends" class="m-3 hover:opacity-75 focus:outline-none">
           <font-awesome-icon :icon="['fas', 'users']" size="2x" />
         </router-link>
-        <router-link to="/" class="m-2 hover:opacity-75 focus:outline-none">
+        <router-link to="/" class="relative m-3 hover:opacity-75 focus:outline-none">
+          <div v-if="$store.state.user.newMessagesCount" class="absolute bottom-5 left-4 flex items-center justify-center h-6 w-6 font-bold text-xs bg-lightred text-white rounded-full">{{ $store.state.user.newMessagesCount }}</div>
           <font-awesome-icon :icon="['fas', 'comment-dots']" size="2x" />
         </router-link>
       </div>
@@ -60,7 +61,10 @@ export default {
     setUser() {
       const self = this
       firebase.auth().onAuthStateChanged((user) => {
-        firebase.database().ref("users").child(user.uid).get().then(function(snapshot) {
+        // firebase.database().ref("users").child(user.uid).get().then(function(snapshot) {
+        //   self.$store.commit("setCurrentUser", snapshot.val())
+        // })
+        firebase.database().ref("users").child(user.uid).on("value", (snapshot) => {
           self.$store.commit("setCurrentUser", snapshot.val())
         })
       })
@@ -104,17 +108,6 @@ export default {
       firebase.database().ref("users").on("child_added", (snapshot) => {
         let user = snapshot.val()
         user.status = "offline"
-
-        ///
-        // let countUnread = 0
-        // const messageId = self.uid > user.uid ? (self.uid + "-" + user.uid) : (user.uid + "-" + self.uid)
-        // firebase.database().ref("messages").child(messageId).on("child_added", (snap) => {
-        //   if (snap.val().unread == self.uid) {
-        //     countUnread = countUnread + 1
-        //   }
-        // })
-        // user.countUnread = countUnread
-        ///
 
         if (self.uid != user.uid) {
           users.push(user)

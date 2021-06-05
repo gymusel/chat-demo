@@ -17,8 +17,8 @@
         <button v-for="channel in sortedChannels" :key="channel.id" @click="message(channel)" class="w-full flex items-center h-16 border-b border-gray-700 focus:outline-none">
           <div class="ml-3 flex items-end">
             <img :src="channel.photoURL" v-if="channel.photoURL" class="bg-black h-12 w-12 rounded-full" />
-          <img :src="channel.opponent.photoURL" v-else-if="channel.opponent && channel.opponent.photoURL" class="bg-black h-12 w-12 rounded-full" />
-          <img src="@/assets/logo.png" v-else class="bg-black h-12 w-12 rounded-full" />
+            <img :src="channel.opponent.photoURL" v-else-if="channel.opponent && channel.opponent.photoURL" class="bg-black h-12 w-12 rounded-full" />
+            <img src="@/assets/logo.png" v-else class="bg-black h-12 w-12 rounded-full" />
             <country-flag country='jp' size='small' rounded class="mt-auto relative right-4" />
           </div>
           <div class="pr-3 flex-grow flex flex-col items-start">
@@ -27,9 +27,9 @@
               <p v-else class="font-bold text-sm">{{ channel.displayName }}</p>
               <p class="font-light text-xs">{{ howOld(channel.updatedAt) }}</p>
             </div>
-            <div class="w-full flex justify-between items-center">
+            <div class="h-6 w-full flex justify-between items-center">
               <p class="font-thin text-xs">{{ channel.newestMessage }}</p>
-              <div v-if="newMessagesCount(channel.newMessagesCounts)" class="font-light text-xs bg-lightgreen h-4 w-4 rounded-full">{{ newMessagesCount(channel.newMessagesCounts) }}</div>
+              <div v-if="newMessagesCount(channel.newMessagesCounts)" class="flex items-center justify-center h-6 w-6 font-bold text-xs bg-lightgreen rounded-full">{{ newMessagesCount(channel.newMessagesCounts) }}</div>
             </div>
           </div>
         </button>
@@ -249,15 +249,20 @@ export default {
         this.$store.commit("setMessages", messages)
 
         let newMessagesCounts = {}
+        let newMessagesCount = this.$store.state.user.newMessagesCount
         firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
           newMessagesCounts = snap.val().newMessagesCounts
           for (let uid in newMessagesCounts) {
             if (uid == this.uid) {
+              newMessagesCount = newMessagesCount - newMessagesCounts[uid]
               newMessagesCounts[uid] = 0
             }
           }
           firebase.database().ref("channel").child(this.$store.state.room_id).update({
             newMessagesCounts: newMessagesCounts,
+          })
+          firebase.database().ref("users").child(this.uid).update({
+            newMessagesCount: newMessagesCount,
           })
         })
 
@@ -292,15 +297,20 @@ export default {
       this.$store.commit("setMessages", messages)
 
       let newMessagesCounts = {}
+      let newMessagesCount = this.$store.state.user.newMessagesCount
       firebase.database().ref("channel").child(this.$store.state.room_id).once("value", (snap) => {
         newMessagesCounts = snap.val().newMessagesCounts
         for (let uid in newMessagesCounts) {
           if (uid == this.uid) {
+            newMessagesCount = newMessagesCount - newMessagesCounts[uid]
             newMessagesCounts[uid] = 0
           }
         }
         firebase.database().ref("channel").child(this.$store.state.room_id).update({
           newMessagesCounts: newMessagesCounts,
+        })
+        firebase.database().ref("users").child(this.uid).update({
+          newMessagesCount: newMessagesCount,
         })
       })
 

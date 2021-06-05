@@ -152,15 +152,20 @@ export default {
       this.$store.commit("setMessages", messages)
 
       let newMessagesCounts = {}
+      let newMessagesCount = this.$store.state.user.newMessagesCount
       firebase.database().ref("channel").child(roomId).once("value", (snap) => {
         newMessagesCounts = snap.val().newMessagesCounts
         for (let uid in newMessagesCounts) {
           if (uid == this.currentUserId) {
+            newMessagesCount = newMessagesCount - newMessagesCounts[uid]
             newMessagesCounts[uid] = 0
           }
         }
         firebase.database().ref("channel").child(roomId).update({
           newMessagesCounts: newMessagesCounts,
+        })
+        firebase.database().ref("users").child(this.uid).update({
+          newMessagesCount: newMessagesCount,
         })
       })
 
