@@ -22,7 +22,14 @@ export default new Vuex.Store({
     updatePhotoURL(state, photoURL) {
       state.user.photoURL = photoURL
     },
-    updateUser(state, displayName, nativeLang1, learningLang1, hobbies, selfIntroduction) {
+    updateUser(
+      state,
+      displayName,
+      nativeLang1,
+      learningLang1,
+      hobbies,
+      selfIntroduction
+    ) {
       state.user.displayName = displayName
       state.user.nativeLang1 = nativeLang1
       state.user.learningLang1 = learningLang1
@@ -69,7 +76,7 @@ export default new Vuex.Store({
       state.participants = []
       state.room_id = ""
       state.messages = []
-    }
+    },
   },
   actions: {},
   modules: {},

@@ -5,8 +5,8 @@ import store from "./store"
 import "./assets/tailwind.css"
 import "./firebase"
 
-import CountryFlag from 'vue-country-flag'
-Vue.component('country-flag', CountryFlag)
+import CountryFlag from "vue-country-flag"
+Vue.component("country-flag", CountryFlag)
 
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { fas } from "@fortawesome/free-solid-svg-icons"
@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
 library.add(fas, fab, far)
 Vue.component("font-awesome-icon", FontAwesomeIcon)
 
-import OnoffToggle from 'vue-onoff-toggle'
+import OnoffToggle from "vue-onoff-toggle"
 Vue.use(OnoffToggle)
 
 // import VueLazyload from 'vue-lazyload'

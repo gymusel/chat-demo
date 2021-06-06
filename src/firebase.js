@@ -23,11 +23,22 @@ firebase.analytics()
 // messaging.getToken({ vapidKey: "BHMmCujW0_qNIJtVWsiI5pMup6tRD2JdJexvX3mY60kaYBJ53Vr4EYGKZ7HKDGIpmzO7OLqergx8gTD20nSajMM" }).then((currentToken) => {
 //   if (currentToken) {
 //     // Send the token to your server and update the UI if necessary
-//     console.log(currentToken)
+//     console.log("Your currentToken is " + currentToken)
+//     firebase.database().ref("users").child(uid).update({
+//       fcmToken: currentToken,
+//     })
 //   } else {
 //     // Show permission request UI
 //     console.log('No registration token available. Request permission to generate one.')
 //   }
 // }).catch((err) => {
 //   console.log('An error occurred while retrieving token. ', err)
+// })
+
+// Handle incoming messages. Called when:
+// - a message is received while the app has focus
+// - the user clicks on an app notification created by a service worker
+//   `messaging.onBackgroundMessage` handler.
+// messaging.onMessage((payload) => {
+//   console.log('Message received. ', payload)
 // })
