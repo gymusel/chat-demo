@@ -12,20 +12,21 @@ admin.initializeApp(functions.config().firebase);
 // });
 
 // Sends a notifications to all users when a new message is posted.
-exports.sendNotifications = functions.database.ref("/users/{uid}").onUpdate((snapshot) => {
-  const newMessagesCount = snapshot.data().newMessagesCount;
-  if (newMessagesCount > 0) {
+exports.sendNotifications = functions.database.ref("/users/{uid}").onUpdate((change) => {
+  const userRef = change.after.val();
+  if (userRef.newMessagesCount > 0) {
     // This registration token comes from the client FCM SDKs.
-    const message = {
+    const payload = {
       notification: {
-        title: "Notification from chat-demo",
-        body: `You have ${newMessagesCount} unread messages`,
-      },
-      token: snapshot.data().fcmToken
+        title: "chat-demo",
+        body: `You have ${userRef.newMessagesCount} unread messages`,
+        icon: "@/assets/logo.png",
+        click_action: "https://chat-demo-f2a33.web.app/"
+      }
     };
 
     // Send a message to the device corresponding to the provided registration token.
-    admin.messaging().send(message).then((response) => {
+    admin.messaging().sendToDevice(userRef.fcmToken, payload).then((response) => {
       console.log('Successfully sent message:', response);
     }).catch((error) => {
       console.log('Error sending message:', error);

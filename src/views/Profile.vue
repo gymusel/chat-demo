@@ -13,8 +13,8 @@
       class="
         mb-24
         sm:mb-0
-        lg:flex
-        lg:justify-between
+        xl:flex
+        xl:justify-between
         flex-grow
         h-screen
         overflow-y-auto
@@ -32,8 +32,8 @@
           pt-5
           px-5
           xl:p-5
-          lg:flex lg:flex-col
-          lg:justify-between
+          xl:flex xl:flex-col
+          xl:justify-between
           xl:h-screen
           xl:w-1/2
           w-full
@@ -52,7 +52,7 @@
             <img
               :src="$store.state.user.photoURL"
               v-if="$store.state.user.photoURL"
-              class="h-28 w-28 rounded-full"
+              class="h-28 w-28 object-cover rounded-full"
             />
             <img
               src="@/assets/logo.png"
@@ -77,7 +77,7 @@
         </div>
         <div
           class="
-            lg:flex-grow
+            xl:flex-grow
             p-3
             mt-5
             w-full
@@ -110,8 +110,8 @@
         class="
           mb-24
           sm:mb-0
-          lg:flex lg:flex-col
-          lg:justify-between
+          xl:flex xl:flex-col
+          xl:justify-between
           xl:h-screen
           xl:w-1/2
           w-full
@@ -148,7 +148,7 @@
         </div>
         <div
           class="
-            lg:flex-grow
+            xl:flex-grow
             p-3
             mt-5
             w-full
@@ -194,8 +194,8 @@
       class="
         mb-24
         sm:mb-0
-        lg:flex
-        lg:justify-between
+        xl:flex
+        xl:justify-between
         flex-grow
         h-screen
         overflow-y-auto
@@ -213,8 +213,8 @@
           pt-5
           px-5
           xl:p-5
-          lg:flex lg:flex-col
-          lg:justify-between
+          xl:flex xl:flex-col
+          xl:justify-between
           xl:h-screen
           xl:w-1/2
           w-full
@@ -263,7 +263,7 @@
         </div>
         <div
           class="
-            lg:flex-grow
+            xl:flex-grow
             p-3
             mt-5
             w-full
@@ -300,8 +300,8 @@
         class="
           mb-24
           sm:mb-0
-          lg:flex lg:flex-col
-          lg:justify-between
+          xl:flex xl:flex-col
+          xl:justify-between
           xl:h-screen
           xl:w-1/2
           w-full
@@ -349,7 +349,7 @@
         </div>
         <div
           class="
-            lg:flex-grow
+            xl:flex-grow
             p-3
             mt-5
             w-full

@@ -12,9 +12,9 @@
       class="
         mb-24
         sm:mb-0
-        lg:flex
-        lg:justify-between
-        lg:flex-wrap
+        xl:flex
+        xl:justify-between
+        xl:flex-wrap
         flex-grow
         h-screen
         overflow-y-auto
@@ -32,8 +32,8 @@
           pt-5
           px-5
           xl:p-5
-          lg:flex lg:flex-col
-          lg:justify-between
+          xl:flex xl:flex-col
+          xl:justify-between
           xl:h-screen
           xl:w-1/2
           w-full
@@ -52,7 +52,7 @@
             <img
               :src="photoURL"
               v-if="photoURL"
-              class="h-28 w-28 rounded-full"
+              class="h-28 w-28 object-cover rounded-full"
             />
             <img
               src="@/assets/logo.png"
@@ -72,7 +72,7 @@
         </div>
         <div
           class="
-            lg:flex-grow
+            xl:flex-grow
             p-3
             mt-5
             w-full
@@ -105,8 +105,8 @@
         class="
           mb-24
           sm:mb-0
-          lg:flex lg:flex-col
-          lg:justify-between
+          xl:flex xl:flex-col
+          xl:justify-between
           xl:h-screen
           xl:w-1/2
           w-full
@@ -143,7 +143,7 @@
         </div>
         <div
           class="
-            lg:flex-grow
+            xl:flex-grow
             p-3
             mt-5
             w-full

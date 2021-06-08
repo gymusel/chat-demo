@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex flex-col">
-    <div class="p-3 flex justify-between items-center">
+    <div class="w-64 p-3 flex justify-between items-center">
       <button
         @click="showPartners"
         v-bind:class="{ active: isPartnersVisible }"
@@ -86,7 +86,7 @@
           <img
             :src="user.photoURL"
             v-if="user.photoURL"
-            class="bg-black h-12 w-12 rounded-full"
+            class="bg-black h-12 w-12 object-cover rounded-full"
           />
           <img
             src="@/assets/logo.png"

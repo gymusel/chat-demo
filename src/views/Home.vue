@@ -104,7 +104,7 @@
             <div v-else class="flex">
               <img
                 :src="photoURL(message.uid)"
-                class="h-10 w-10 rounded-full"
+                class="h-10 w-10 object-cover rounded-full"
               />
               <div class="ml-2">
                 <div class="font-bold">{{ displayName(message.uid) }}</div>
@@ -198,15 +198,8 @@
         </div>
 
         <footer class="mb-24 sm:mb-0 border-t border-gray-700">
-          <textarea
-            v-model="message"
-            ref="input"
-            @keydown.enter="sendMessageCommandEnter"
-            placeholder="Enter a message"
-            :rows="rows"
-            class="w-full py-4 pl-6 outline-none resize-none bg-gray-800"
-          />
-          <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageInputEvent" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
+          <textarea v-model="message" v-if="$store.state.user.enterMessage" ref="input" @keydown.enter.exact="enterMessage" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
+          <textarea v-model="message" v-else ref="input" @keydown.enter="commandEnterMessage" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
           <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageCompositionEvent" @compositionstart="composing=true" @compositionend="composing=false" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
           <div class="flex items-center fill-current text-gray-400 ml-6 mb-2">
             <label class="flex items-center hover:opacity-70">
@@ -252,7 +245,7 @@
 import HomeNav from "../components/HomeNav.vue"
 import firebase from "firebase/app"
 import "firebase/auth"
-import "firebase/messaging"
+// import "firebase/messaging"
 import "firebase/storage"
 import "lazysizes"
 
@@ -497,7 +490,7 @@ export default {
 
       this.message = this.url = this.file = ""
     },
-    sendMessageCommandEnter() {
+    commandEnterMessage() {
       if (this.message === "" && !this.file) {
         console.log("message and file are blank")
       } else if (
@@ -614,7 +607,7 @@ export default {
         console.log("not command + enter")
       }
     },
-    sendMessageInputEvent() {
+    enterMessage() {
       event.preventDefault()
       if (event.isComposing) {
         console.log("文字変換")

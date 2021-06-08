@@ -43,12 +43,12 @@
             <img
               :src="channel.photoURL"
               v-if="channel.photoURL"
-              class="bg-black h-12 w-12 rounded-full"
+              class="bg-black h-12 w-12 object-cover rounded-full"
             />
             <img
               :src="channel.opponent.photoURL"
               v-else-if="channel.opponent && channel.opponent.photoURL"
-              class="bg-black h-12 w-12 rounded-full"
+              class="bg-black h-12 w-12 object-cover rounded-full"
             />
             <img
               src="@/assets/logo.png"
@@ -128,7 +128,7 @@
           <img
             :src="user.photoURL"
             v-if="user.photoURL"
-            class="mx-3 bg-black h-12 w-12 rounded-full"
+            class="mx-3 bg-black h-12 w-12 object-cover rounded-full"
           />
           <img
             src="@/assets/logo.png"

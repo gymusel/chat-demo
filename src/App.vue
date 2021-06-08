@@ -42,7 +42,7 @@
           <img
             :src="$store.state.user.photoURL"
             v-if="$store.state.user.photoURL"
-            class="rounded-full"
+            class="rounded-full object-cover h-10 w-10"
           />
           <img src="@/assets/logo.png" v-else class="rounded-full" />
         </router-link>
@@ -336,7 +336,9 @@ export default {
               self.addedToHomeScreen = snapshot.val().addedToHomeScreen
             })
         }
-        this.setFcmToken()
+        if (firebase.messaging.isSupported()) {
+          this.setFcmToken()
+        }
         this.setUser()
         this.setChannels()
         this.setUsers()

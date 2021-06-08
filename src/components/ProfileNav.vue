@@ -17,7 +17,7 @@
       <img
         :src="$store.state.user.photoURL"
         v-if="$store.state.user.photoURL"
-        class="h-14 w-14 rounded-full p-1 mr-1"
+        class="h-14 w-14 object-cover rounded-full p-1 mr-1"
       />
       <img
         src="@/assets/logo.png"
@@ -34,7 +34,7 @@
       />
     </button>
 
-    <div class="w-full bg-gray-700 mt-6">
+    <!-- <div class="w-full bg-gray-700 mt-6">
       <button
         @click="$emit('optionOne')"
         class="bg-gray-700 p-1 w-full flex items-center focus:outline-none"
@@ -82,22 +82,27 @@
           class="ml-auto mr-1 h-6 w-6 text-gray-400"
         />
       </button>
-    </div>
+    </div> -->
 
-    <div class="w-full bg-gray-700 mt-6">
-      <div class="bg-gray-700 p-1 flex items-center">
-        <div class="bg-lightred h-6 w-6 rounded m-2" />
-        <h1>Option one</h1>
-        <onoff-toggle
-          v-model="checkedOne"
-          height="25"
-          width="45"
-          margin="2"
-          onColor="#75C791"
-          class="ml-auto mr-1"
-        />
+    <div class="hidden lg:inline w-full bg-gray-700 mt-6">
+      <div class="bg-gray-700 w-full flex flex-col items-center">
+        <div class="w-full flex items-center justify-between">
+          <div class="m-2 h-6 w-6 flex items-center justify-center rounded bg-lightred">
+            <font-awesome-icon :icon="['fas', 'i-cursor']" size="sm" />
+          </div>
+          <h1>Press enter to send</h1>
+          <onoff-toggle
+            v-model="enterMessage"
+            height="25"
+            width="45"
+            margin="2"
+            onColor="#75C791"
+            class="ml-auto mr-1"
+          />
+        </div>
+        <p class="mb-2 font-thin text-sm">Only applicable to Chrome browser</p>
       </div>
-      <div
+      <!-- <div
         class="
           bg-gray-700
           p-1
@@ -128,7 +133,7 @@
           onColor="#75C791"
           class="ml-auto mr-1"
         />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -140,13 +145,28 @@ export default {
   data() {
     return {
       uid: "",
-      checkedOne: false,
-      checkedTwo: false,
-      checkedThree: false,
+      userRef: {},
+      enterMessage: false,
     }
   },
-  mounted() {
+  created() {
+    const self = this
     this.uid = firebase.auth().currentUser.uid
+    this.userRef = firebase.database().ref("users").child(this.uid)
+    this.userRef.get().then(function (snapshot) {
+      if (snapshot.val().enterMessage) {
+        self.enterMessage = snapshot.val().enterMessage
+      } else {
+        self.enterMessage = false
+      }
+    })
   },
+  watch: {
+    enterMessage() {
+      this.userRef.update({
+        enterMessage: this.enterMessage,
+      })
+    },
+  }
 }
 </script>
