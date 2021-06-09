@@ -24,3 +24,4 @@ pnpm-debug.log*
 
 
 functions/serviceAccountKey.json
+public/firebase-messaging-sw.js
