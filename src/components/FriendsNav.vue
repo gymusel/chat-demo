@@ -142,6 +142,9 @@ export default {
   },
   mounted() {
     this.uid = firebase.auth().currentUser.uid
+    if (!this.$store.state.follows.length) {
+      this.isPartnersVisible = false
+    }
   },
   computed: {
     sortedUsers() {

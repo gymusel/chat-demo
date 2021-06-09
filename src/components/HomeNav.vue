@@ -241,6 +241,9 @@ export default {
   methods: {
     toggleRoomSelect() {
       this.roomSelect = this.roomSelect ? false : true
+      if (this.roomSelect == false && !this.$store.state.follows.length) {
+        this.$router.push("/friends")
+      }
     },
     howOld(timestamp) {
       const now = new Date()
