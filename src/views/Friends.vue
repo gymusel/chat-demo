@@ -7,7 +7,7 @@
     />
 
     <div
-      v-show="isProfileVisible"
+      v-if="isProfileVisible"
       :class="{ 'hidden sm:inline': isNavInvisible }"
       class="
         mb-24
@@ -60,7 +60,8 @@
               class="h-28 w-28 rounded-full"
             />
             <button class="hover:text-lightred focus:outline-none">
-              <font-awesome-icon :icon="['fas', 'heart']" size="2x" />
+              <font-awesome-icon :icon="['fas', 'heart']" size="2x" v-if="follows.includes(uid)" @click="unfollow(uid)" style="color:#FF565E;" />
+              <font-awesome-icon :icon="['far', 'heart']" size="2x" v-else @click="follow(uid)" />
             </button>
           </div>
           <country-flag
@@ -198,8 +199,10 @@ export default {
       isNavVisible: true,
       isNavInvisible: false,
       currentUserId: "",
+      follows: [],
       isProfileVisible: false,
       user: {},
+      uid: "",
       displayName: "",
       photoURL: "",
       nativeLang1: "ja",
@@ -208,8 +211,20 @@ export default {
       selfIntroduction: "",
     }
   },
+  created() {
+    const self = this
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.currentUserId = user.uid
+        firebase.database().ref("users").child(user.uid).get().then(function (snapshot) {
+          if (snapshot.val().follows) {
+            self.follows = snapshot.val().follows
+          }
+        })
+      }
+    })
+  },
   mounted() {
-    this.currentUserId = firebase.auth().currentUser.uid
     if (matchMedia("(max-width: 640px)").matches) {
       this.isNavInvisible = true
     }
@@ -226,12 +241,55 @@ export default {
       this.toggleNavVisible()
       this.isProfileVisible = true
       this.user = user
+      this.uid = user.uid
       this.displayName = user.displayName
       this.photoURL = user.photoURL
       this.nativeLang1 = user.nativeLang1
       this.learningLang1 = user.learningLang1
       this.hobbies = user.hobbies
       this.selfIntroduction = user.selfIntroduction
+    },
+    follow(uid) {
+      console.log('Adding ' + uid + ' to your follows')
+
+      const currentUserDoc = firebase.database().ref("users").child(this.currentUserId)
+      this.follows.push(uid)
+      currentUserDoc.update({
+        follows: this.follows,
+      })
+
+      const userDoc = firebase.database().ref("users").child(uid)
+      let followers = []
+      userDoc.get().then(function (snapshot) {
+        if (snapshot.val().followers) {
+          followers = snapshot.val().followers
+        }
+      })
+      followers.push(this.currentUserId)
+      userDoc.update({
+        followers: followers,
+      })
+    },
+    unfollow(uid) {
+      console.log('Removing ' + uid + ' from your follows')
+      
+      const currentUserDoc = firebase.database().ref("users").child(this.currentUserId)
+      this.follows = this.follows.filter((item) => item !== uid)
+      currentUserDoc.update({
+        follows: this.follows,
+      })
+
+      const userDoc = firebase.database().ref("users").child(uid)
+      let followers = []
+      userDoc.get().then(function (snapshot) {
+        if (snapshot.val().followers) {
+          followers = snapshot.val().followers
+        }
+      })
+      followers.filter((item) => item !== this.currentUserId)
+      userDoc.update({
+        followers: followers,
+      })
     },
     message() {
       const roomId =

@@ -254,8 +254,20 @@ export default {
             users.push(user)
           }
         })
-      console
       this.$store.commit("setUsers", users)
+    },
+    setFollows() {
+      let follows = []
+      firebase.database().ref("users").child(this.uid).get().then(function (snapshot) {
+        if (snapshot.val().follows) {
+          firebase.database().ref("users").once("child_added", function (snap) {
+            if (snapshot.val().follows.includes(snap.val().uid)) {
+              follows.push(snap.val())
+            }
+          })
+        }
+      })
+      this.$store.commit("setFollows", follows)
     },
     setConnected() {
       firebase
@@ -342,6 +354,7 @@ export default {
         this.setUser()
         this.setChannels()
         this.setUsers()
+        this.setFollows()
         this.setConnected()
         this.setConnectionAdded()
         this.setConnectionRemoved()

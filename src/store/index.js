@@ -8,6 +8,7 @@ export default new Vuex.Store({
     user: {},
     channels: [],
     users: [],
+    follows: [],
     connection_key: "",
     connections: [],
     room: {},
@@ -41,6 +42,9 @@ export default new Vuex.Store({
     },
     setUsers(state, users) {
       state.users = users
+    },
+    setFollows(state, follows) {
+      state.follows = follows
     },
     setConnectionKey(state, connection_key) {
       state.connection_key = connection_key

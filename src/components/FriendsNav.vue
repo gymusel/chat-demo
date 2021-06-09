@@ -1,8 +1,8 @@
 <template>
   <div class="h-screen flex flex-col">
-    <div class="w-64 p-3 flex justify-between items-center">
+    <div class="w-full p-3 flex justify-between items-center">
       <button
-        @click="showPartners"
+        @click="togglePartners"
         v-bind:class="{ active: isPartnersVisible }"
         class="
           flex-grow
@@ -21,8 +21,8 @@
         Partners
       </button>
       <button
-        @click="showNewPartners"
-        v-bind:class="{ active: isNewPartnersVisible }"
+        @click="togglePartners"
+        v-bind:class="{ active: !isPartnersVisible }"
         class="
           flex-grow
           sm:flex-grow-0
@@ -62,14 +62,6 @@
 
     <div class="mb-24 sm:mb-0 py-2 overflow-y-auto">
       <button
-        v-show="isPartnersVisible"
-        class="w-full flex flex-col items-center"
-      >
-        <h1 class="font-bold text-4xl m-5">Sorry!</h1>
-        <p>This page is currently being developed</p>
-      </button>
-      <button
-        v-show="isNewPartnersVisible"
         v-for="user in sortedUsers"
         :key="user.uid"
         @click="showProfile(user)"
@@ -130,8 +122,7 @@ export default {
   data() {
     return {
       uid: "",
-      isPartnersVisible: false,
-      isNewPartnersVisible: true,
+      isPartnersVisible: true,
       sortOrder: 1,
     }
   },
@@ -142,13 +133,8 @@ export default {
     isOnline(user) {
       return user.status === "online" ? true : false
     },
-    showPartners() {
-      this.isPartnersVisible = true
-      this.isNewPartnersVisible = false
-    },
-    showNewPartners() {
-      this.isPartnersVisible = false
-      this.isNewPartnersVisible = true
+    togglePartners() {
+      this.isPartnersVisible = this.isPartnersVisible ? false : true
     },
     showProfile(user) {
       this.$emit("showProfile", user)
@@ -159,7 +145,8 @@ export default {
   },
   computed: {
     sortedUsers() {
-      return this.$store.state.users.slice().sort((a, b) => {
+      const users = this.isPartnersVisible ? this.$store.state.follows : this.$store.state.users
+      return users.slice().sort((a, b) => {
         let textA = a.displayName.toUpperCase()
         let textB = b.displayName.toUpperCase()
         return textA < textB

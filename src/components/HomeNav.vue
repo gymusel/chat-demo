@@ -113,7 +113,7 @@
       </div>
       <div class="h-full w-full overflow-y-scroll">
         <button
-          v-for="user in sortedUsers"
+          v-for="user in sortedFollows"
           :key="user.uid"
           @click="toggleUserChecked(user.uid)"
           class="
@@ -225,8 +225,8 @@ export default {
           : 0
       })
     },
-    sortedUsers() {
-      return this.$store.state.users.slice().sort((a, b) => {
+    sortedFollows() {
+      return this.$store.state.follows.slice().sort((a, b) => {
         let textA = a.displayName.toUpperCase()
         let textB = b.displayName.toUpperCase()
         return textA < textB ? -1 : textA > textB ? 1 : 0
