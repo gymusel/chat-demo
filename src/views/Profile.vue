@@ -3,13 +3,11 @@
     <ProfileNav
       v-on:profile="showProfile"
       v-on:optionOne="showOptionOne"
-      :class="{ 'hidden sm:inline': !isNavVisible }"
-      class="w-full sm:w-64 py-3 border-r border-gray-700"
+      class="hidden sm:inline w-full sm:w-64 py-3 border-r border-gray-700"
     />
 
     <div
       v-show="isProfileVisible"
-      :class="{ 'hidden sm:inline': isNavInvisible }"
       class="
         mb-24
         sm:mb-0
@@ -20,13 +18,13 @@
         overflow-y-auto
       "
     >
-      <button
+      <!-- <button
         @click="toggleNavVisible"
         class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center"
       >
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
-      </button>
+      </button> -->
       <div
         class="
           pt-5
@@ -190,7 +188,6 @@
     <form
       @submit.prevent="updateProfile"
       v-show="isEditProfileVisible"
-      :class="{ 'hidden sm:inline': isNavInvisible }"
       class="
         mb-24
         sm:mb-0
@@ -201,13 +198,12 @@
         overflow-y-auto
       "
     >
-      <button
-        @click="toggleNavVisible"
+      <!-- <button
         class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center"
       >
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
-      </button>
+      </button> -->
       <div
         class="
           pt-5
@@ -453,15 +449,13 @@
 
     <div
       v-show="isOptionOneVisible"
-      :class="{ 'hidden sm:inline': isNavInvisible }"
     >
-      <button
-        @click="toggleNavVisible"
+      <!-- <button
         class="sm:hidden focus:outline-none mt-5 mx-5 flex items-center"
       >
         <font-awesome-icon :icon="['fas', 'angle-left']" size="2x" />
         <h1 class="ml-5 font-bold">Back to previous page</h1>
-      </button>
+      </button> -->
     </div>
   </div>
 </template>
@@ -481,8 +475,8 @@ export default {
   },
   data() {
     return {
-      isNavVisible: true,
-      isNavInvisible: false,
+      // isNavVisible: true,
+      // isNavInvisible: false,
       isProfileVisible: true,
       isEditProfileVisible: false,
       user: {},
@@ -543,22 +537,21 @@ export default {
       self.selfIntroduction = snapshot.val().selfIntroduction
     })
   },
-  mounted() {
-    if (matchMedia("(max-width: 640px)").matches) {
-      this.isNavInvisible = true
-    }
-    // this.isProfileVisible = false
-  },
+  // mounted() {
+  //   if (matchMedia("(max-width: 640px)").matches) {
+  //     this.isNavInvisible = true
+  //   }
+  // },
   methods: {
-    toggleNavVisible() {
-      if (matchMedia("(max-width: 640px)").matches) {
-        this.isNavVisible = this.isNavInvisible = this.isNavVisible
-          ? false
-          : true
-      }
-    },
+    // toggleNavVisible() {
+    //   if (matchMedia("(max-width: 640px)").matches) {
+    //     this.isNavVisible = this.isNavInvisible = this.isNavVisible
+    //       ? false
+    //       : true
+    //   }
+    // },
     showProfile() {
-      this.toggleNavVisible()
+      // this.toggleNavVisible()
       this.isProfileVisible = true
       this.isEditProfileVisible = false
       this.isOptionOneVisible = false
@@ -648,7 +641,7 @@ export default {
       this.isEditProfileVisible = false
     },
     showOptionOne() {
-      this.toggleNavVisible()
+      // this.toggleNavVisible()
       this.isProfileVisible = false
       this.isEditProfileVisible = false
       this.isOptionOneVisible = true

@@ -198,10 +198,10 @@
         </div>
 
         <footer class="mb-24 sm:mb-0 border-t border-gray-700">
-          <textarea v-model="message" v-if="$store.state.user.enterMessage" ref="input" @keydown.enter.exact="enterMessage" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
-          <textarea v-model="message" v-else ref="input" @keydown.enter="commandEnterMessage" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" />
+          <textarea v-model="message" v-if="$store.state.user.enterMessage" ref="input" @keydown.enter.exact="enterMessage" placeholder="Enter a message" :rows="rows" class="w-full p-4 outline-none resize-none bg-gray-800" />
+          <textarea v-model="message" v-else ref="input" @keydown.enter="commandEnterMessage" placeholder="Enter a message" :rows="rows" class="w-full p-4 outline-none resize-none bg-gray-800" />
           <!-- <textarea v-model="message" ref="input" @keydown.enter.exact="sendMessageCompositionEvent" @compositionstart="composing=true" @compositionend="composing=false" placeholder="Enter a message" :rows="rows" class="w-full py-4 pl-6 outline-none resize-none bg-gray-800" /> -->
-          <div class="flex items-center fill-current text-gray-400 ml-6 mb-2">
+          <div class="flex items-center fill-current text-gray-400 ml-6 mb-3">
             <label class="flex items-center hover:opacity-70">
               <input
                 type="file"
@@ -225,10 +225,12 @@
             <button class="ml-auto mr-5 focus:outline-none">
               <font-awesome-icon
                 :icon="['fas', 'paper-plane']"
+                size="2x"
                 v-if="!message && !file"
               />
               <font-awesome-icon
                 :icon="['fas', 'paper-plane']"
+                size="2x"
                 @click="sendMessage"
                 v-else
                 class="text-green-500"
